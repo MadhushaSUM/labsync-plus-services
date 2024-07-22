@@ -1,4 +1,4 @@
-### Terraform files
+### Terraform related files
 # Local .terraform directories
 **/.terraform/*
 
@@ -15,3 +15,5 @@ terraform.tfstate.backup
 # Crash log files
 crash.log
 
+### Node related files
+**/node_modules/*
