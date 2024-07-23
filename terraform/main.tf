@@ -10,14 +10,14 @@ module "lambda_functions" {
     {
       name        = "function1"
       handler     = "src/functions/function1/handler.handler"
-      runtime     = "nodejs14.x"
+      runtime     = "nodejs20.x"
       memory_size = 128
       timeout     = 10
     },
     {
       name        = "function2"
       handler     = "src/functions/function2/handler.handler"
-      runtime     = "nodejs14.x"
+      runtime     = "nodejs20.x"
       memory_size = 128
       timeout     = 10
     },
@@ -46,5 +46,24 @@ module "dynamodb_tables" {
         { name = "id", type = "S" }
       ]
     }
+  ]
+}
+
+module "api_gateway" {
+  source = "./modules/apigateway"
+  name = "my-api-gateway"
+  description = "API Gateway for my serverless application"
+  endpoints = [
+    {
+      path = "/function1"
+      method = "GET"
+      lambda_function = module.lambda_functions.function1
+    },
+    {
+      path = "/function2"
+      method = "GET"
+      lambda_function = module.lambda_functions.function2
+    },
+    # More endpoints...
   ]
 }

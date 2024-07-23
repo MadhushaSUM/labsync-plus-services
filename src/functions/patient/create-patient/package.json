@@ -1,0 +1,15 @@
+{
+  "name": "create-patient",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "madhusha.sum",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.141",
+    "aws-lambda": "^1.0.7"
+  }
+}
