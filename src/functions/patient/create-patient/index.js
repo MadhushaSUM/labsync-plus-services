@@ -10,7 +10,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
+const patientService_1 = require("../../../shared/services/patientService");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(event);
+    try {
+        const result = yield (0, patientService_1.addPatient)(event);
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Patient added successfully', patient: result })
+        };
+    }
+    catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'Internal Server Error', error: error.message })
+        };
+    }
 });
 exports.handler = handler;
