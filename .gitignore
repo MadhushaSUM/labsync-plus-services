@@ -17,3 +17,6 @@ crash.log
 
 ### Node related files
 **/node_modules/*
+
+### Bundled function codes
+bundled/*

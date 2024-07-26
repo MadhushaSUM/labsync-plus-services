@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
   entry: {
     'patient/create-patient': './src/functions/patient/create-patient/index.ts',
-    // 'patient/get-patient-by-id': './src/functions/patient/get-patient-by-id/index.ts',
+    'patient/get-patient-by-id': './src/functions/patient/get-patient-by-id/index.ts',
     // 'doctor/create-doctor': './src/functions/doctor/create-doctor/index.ts',
     // 'doctor/get-doctor-by-id': './src/functions/doctor/get-doctor-by-id/index.ts',
     // 'investigation/get-all-investigations': './src/functions/investigation/get-all-investigations/index.ts',
@@ -24,8 +24,8 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: '[name]/bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: '[name]/index.js',
+    path: path.resolve(__dirname, 'bundled'),
     libraryTarget: 'commonjs2',
   },
 };
