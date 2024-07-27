@@ -1,7 +1,7 @@
-export interface AddPatientType {
+export interface PatientType {
     id: string;
     name: string,
     address: string;
     date_of_birth: string;
-    conatact_number: string;
+    contact_number: string;
 }
