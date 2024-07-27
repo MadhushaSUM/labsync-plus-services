@@ -1,30 +1,39 @@
-variable "functions" {
-  type = list(object({
-    name        = string
-    handler     = string
-    filename    = string
-    runtime     = string
-    memory_size = number
-    timeout     = number
-  }))
-}
-
 data "aws_iam_policy_document" "dynamodb_full_access" {
   statement {
     effect = "Allow"
-
+    actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
-
-    actions = ["sts:AssumeRole"]
   }
 }
 
 resource "aws_iam_role" "iam_lambda_dynamodb_full" {
   name               = "iam_for_lambda"
   assume_role_policy = data.aws_iam_policy_document.dynamodb_full_access.json
+}
+
+resource "aws_iam_policy" "dynamodb_full_access" {
+  name        = "DynamoDBFullAccess"
+  description = "IAM policy for DynamoDB full access"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "dynamodb:*"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "dynamodb_full_access" {
+  policy_arn = aws_iam_policy.dynamodb_full_access.arn
+  role       = aws_iam_role.iam_lambda_dynamodb_full.name
 }
 
 resource "aws_lambda_function" "lambda" {
@@ -37,4 +46,3 @@ resource "aws_lambda_function" "lambda" {
   role          = aws_iam_role.iam_lambda_dynamodb_full.arn
   filename      = "${path.module}/../../../bundled/${each.value.filename}"
 }
-
