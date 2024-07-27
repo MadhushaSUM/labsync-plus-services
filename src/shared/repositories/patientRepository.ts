@@ -38,3 +38,25 @@ export async function fetchAllPatients(limit: number, lastEvaluatedKey: Key) {
         lastEvaluatedKey: result.LastEvaluatedKey
     };
 }
+
+export async function modifyPatient(id: string, patientDetails: PatientType) {
+    const params = {
+        TableName: 'PatientTable',
+        Key: { id: id },
+        UpdateExpression: 'set #name = :name, gender = :gender, address = :address, date_of_birth = :dob, contact_number = :contact',
+        ExpressionAttributeNames: {
+            '#name': 'name'
+        },
+        ExpressionAttributeValues: {
+            ':name': patientDetails.name,
+            ':gender': patientDetails.gender,
+            ':address': patientDetails.address,
+            ':dob': patientDetails.date_of_birth,
+            ':contact': patientDetails.contact_number
+        },
+        ReturnValues: 'ALL_NEW'
+    };
+
+    const result = await dynamoDB.update(params).promise();
+    return result.Attributes;
+}

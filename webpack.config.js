@@ -5,6 +5,7 @@ module.exports = {
     'patient/create-patient': './src/functions/patient/create-patient/index.ts',
     'patient/get-patient-by-id': './src/functions/patient/get-patient-by-id/index.ts',
     'patient/get-all-patients': './src/functions/patient/get-all-patients/get-all-patients.ts',
+    'patient/update-patient': './src/functions/patient/update-patient/update-patient.ts',
     // 'doctor/create-doctor': './src/functions/doctor/create-doctor/index.ts',
     // 'doctor/get-doctor-by-id': './src/functions/doctor/get-doctor-by-id/index.ts',
     // 'investigation/get-all-investigations': './src/functions/investigation/get-all-investigations/index.ts',
