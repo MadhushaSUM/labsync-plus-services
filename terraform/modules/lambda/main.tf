@@ -2,13 +2,14 @@ variable "functions" {
   type = list(object({
     name        = string
     handler     = string
+    filename    = string
     runtime     = string
     memory_size = number
     timeout     = number
   }))
 }
 
-data "aws_iam_policy_document" "assume_role" {
+data "aws_iam_policy_document" "dynamodb_full_access" {
   statement {
     effect = "Allow"
 
@@ -21,9 +22,9 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_iam_role" "iam_for_lambda" {
+resource "aws_iam_role" "iam_lambda_dynamodb_full" {
   name               = "iam_for_lambda"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.dynamodb_full_access.json
 }
 
 resource "aws_lambda_function" "lambda" {
@@ -33,12 +34,7 @@ resource "aws_lambda_function" "lambda" {
   runtime       = each.value.runtime
   memory_size   = each.value.memory_size
   timeout       = each.value.timeout
-  role          = aws_iam_role.iam_for_lambda.arn
-  filename      = "${path.module}/../../src/functions/${each.value.name}/${each.value.name}.zip"
-
-  environment {
-    variables = {
-      DYNAMODB_TABLE = aws_dynamodb_table.dynamodb_table.name
-    }
-  }
+  role          = aws_iam_role.iam_lambda_dynamodb_full.arn
+  filename      = "${path.module}/../../../bundled/${each.value.filename}"
 }
+
