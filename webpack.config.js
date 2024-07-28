@@ -11,6 +11,7 @@ module.exports = {
     'doctor/get-doctor-by-id': './src/functions/doctor/get-doctor-by-id/get-doctor-by-id.ts',
     'doctor/get-all-doctors': './src/functions/doctor/get-all-doctors/get-all-doctors.ts',
     'doctor/update-doctor': './src/functions/doctor/update-doctor/update-doctor.ts',
+    'investigation-register/add-investigation-registration': './src/functions/investigation-register/add-investigation-registration/add-investigation-registration.ts',
   },
   target: 'node',
   mode: 'production',
