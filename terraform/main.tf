@@ -111,6 +111,15 @@ module "dynamodb_tables" {
       attributes = [
         { name = "id", type = "S" }
       ]
+    },
+    {
+      name           = "InvestigationRegisterTable"
+      hash_key       = "id"
+      read_capacity  = 5
+      write_capacity = 5
+      attributes = [
+        { name = "id", type = "S" }
+      ]
     }
   ]
 }
