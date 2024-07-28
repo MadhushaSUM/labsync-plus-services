@@ -8,7 +8,7 @@ module "lambda_functions" {
   source = "./modules/lambda"
   functions = [
     {
-      name        = "create-patient2"
+      name        = "create-patient"
       handler     = "index.handler"
       filename    = "patient/create-patient/create-patient.zip"
       runtime     = "nodejs20.x"
@@ -16,9 +16,65 @@ module "lambda_functions" {
       timeout     = 5
     },
     {
-      name        = "update-patient2"     
+      name        = "update-patient"     
       handler     = "index.handler"  
       filename    = "patient/update-patient/update-patient.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-all-patients"     
+      handler     = "index.handler"  
+      filename    = "patient/get-all-patients/get-all-patients.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-patient-by-id"     
+      handler     = "index.handler"  
+      filename    = "patient/get-patient-by-id/get-patient-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "create-doctor"
+      handler     = "index.handler"
+      filename    = "doctor/create-doctor/create-doctor.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "update-doctor"     
+      handler     = "index.handler"  
+      filename    = "doctor/update-doctor/update-doctor.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-all-doctors"     
+      handler     = "index.handler"  
+      filename    = "doctor/get-all-doctors/get-all-doctors.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-doctor-by-id"     
+      handler     = "index.handler"  
+      filename    = "doctor/get-doctor-by-id/get-doctor-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-investigation-by-id"     
+      handler     = "index.handler"  
+      filename    = "investigation/get-investigation-by-id/get-investigation-by-id.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
       timeout     = 5
@@ -30,7 +86,25 @@ module "dynamodb_tables" {
   source = "./modules/dynamodb"
   tables = [
     {
-      name           = "PatientTable1"
+      name           = "PatientTable"
+      hash_key       = "id"
+      read_capacity  = 5
+      write_capacity = 5
+      attributes = [
+        { name = "id", type = "S" }
+      ]
+    },
+    {
+      name           = "DoctorTable"
+      hash_key       = "id"
+      read_capacity  = 5
+      write_capacity = 5
+      attributes = [
+        { name = "id", type = "S" }
+      ]
+    },
+    {
+      name           = "InvestigationTable"
       hash_key       = "id"
       read_capacity  = 5
       write_capacity = 5
