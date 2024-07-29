@@ -1,10 +1,15 @@
+import { Key } from "aws-sdk/clients/dynamodb";
 import { validateInvestigationRegister } from "../models/investigationRegistration";
-import { fetchInvestigationRegistrationById, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
+import { fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
 
 export async function addInvestigationRegistration(invReg: any) {
     const addingInvReg = await validateInvestigationRegister(invReg);
-    
+
     return await saveInvestigationRegistration(addingInvReg);
+}
+
+export async function getAllInvestigationRegistrations(limit: number, lastEvaluatedKey: Key, filterUnconfirmed: boolean) {
+    return await fetchAllInvestigationRegistrations(limit, lastEvaluatedKey, filterUnconfirmed);
 }
 
 export async function getInvestigationRegistrationById(invRegId: string) {

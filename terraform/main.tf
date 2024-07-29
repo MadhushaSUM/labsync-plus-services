@@ -94,6 +94,14 @@ module "lambda_functions" {
       runtime     = "nodejs20.x"
       memory_size = 128
       timeout     = 5
+    },
+    {
+      name        = "get-all-investigation-registrations"     
+      handler     = "index.handler"  
+      filename    = "investigation-register/get-all-investigation-registrations/get-all-investigation-registrations.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
     }
   ]
 }
