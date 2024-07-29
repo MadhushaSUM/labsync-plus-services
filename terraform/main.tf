@@ -102,6 +102,14 @@ module "lambda_functions" {
       runtime     = "nodejs20.x"
       memory_size = 128
       timeout     = 5
+    },
+    {
+      name        = "confirm-investigation-registration"     
+      handler     = "index.handler"  
+      filename    = "investigation-register/confirm-investigation-registration/confirm-investigation-registration.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
     }
   ]
 }
