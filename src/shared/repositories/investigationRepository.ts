@@ -14,7 +14,8 @@ export async function fetchInvestigationById(investigationId: string) {
 }
 
 export async function fetchInvestigationsByIds(ids: string[]) {
-    const keys = ids.map(id => ({ id }));
+    const uniqueIds = Array.from(new Set(ids));
+    const keys = uniqueIds.map(id => ({ id }));
     const params = {
         RequestItems: {
             InvestigationTable: {

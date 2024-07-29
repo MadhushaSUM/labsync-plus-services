@@ -2,7 +2,7 @@
   "openapi" : "3.0.1",
   "info" : {
     "title" : "Lab Sync - Plus",
-    "version" : "2024-07-28T17:11:46Z"
+    "version" : "2024-07-29T06:13:25Z"
   },
   "servers" : [ {
     "url" : "https://j7kyy7nsrd.execute-api.us-east-1.amazonaws.com/{basePath}",
@@ -36,7 +36,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:get-investigation-by-id/invocations",
           "responses" : {
@@ -45,7 +44,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -74,7 +74,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:get-all-doctors/invocations",
           "responses" : {
@@ -83,7 +82,54 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
+        }
+      }
+    },
+    "/investigation-registration/{id}" : {
+      "put" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Empty"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:update-investigation-registration/invocations",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200"
+            }
+          },
+          "passthroughBehavior" : "when_no_match",
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -112,7 +158,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:get-all-patients/invocations",
           "responses" : {
@@ -121,7 +166,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -148,7 +194,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:get-doctor-by-id/invocations",
           "responses" : {
@@ -157,7 +202,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       },
       "post" : {
@@ -184,7 +230,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:create-doctor/invocations",
           "responses" : {
@@ -193,7 +238,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -230,7 +276,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:update-patient/invocations",
           "responses" : {
@@ -239,7 +284,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -268,7 +314,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:add-investigation-registration/invocations",
           "responses" : {
@@ -277,7 +322,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -304,7 +350,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:get-patient-by-id/invocations",
           "responses" : {
@@ -313,7 +358,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       },
       "post" : {
@@ -340,7 +386,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:create-patient/invocations",
           "responses" : {
@@ -349,7 +394,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     },
@@ -386,7 +432,6 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "type" : "aws_proxy",
           "httpMethod" : "POST",
           "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:966857532446:function:update-doctor/invocations",
           "responses" : {
@@ -395,7 +440,8 @@
             }
           },
           "passthroughBehavior" : "when_no_match",
-          "contentHandling" : "CONVERT_TO_TEXT"
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
         }
       }
     }
