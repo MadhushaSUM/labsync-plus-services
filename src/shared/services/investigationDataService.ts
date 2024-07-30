@@ -1,5 +1,5 @@
 import { validateInvestigationDataRequestBody } from "../models/investigationData";
-import { saveInvestigationData, fetchInvestigationData } from "../repositories/investigationDataRepository";
+import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData } from "../repositories/investigationDataRepository";
 import { InvestigationData } from "../types/investigationData";
 import { v4 as uuidv4 } from 'uuid';
 import { addInvestigationToDataAddedList } from "./investigationRegistrationService";
@@ -21,4 +21,10 @@ export async function addInvestigationData(investigationRegistrationId: string, 
 
 export async function getInvestigationData(investigationRegistrationId: string, investigationId: string) {
     return await fetchInvestigationData(investigationRegistrationId, investigationId);;
+}
+
+export async function updateInvestigationData(investigationDataId: string, investigationId: string, body: any) {
+    const validatedDataBody = await validateInvestigationDataRequestBody(investigationId, body);
+
+    return await modifyInvestigationData(investigationDataId, validatedDataBody);
 }
