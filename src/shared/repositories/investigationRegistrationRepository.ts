@@ -88,16 +88,39 @@ export async function modifyInvestigationRegisterConfirmation(invRegId: string, 
 }
 
 export async function addInvestigationToDataAdded(invRegId: string, investigationId: string) {
-    const params = {
+    // Retrieve the existing item to get the current data_added_investigations set
+    const getParams = {
         TableName: 'InvestigationRegisterTable',
         Key: { id: invRegId },
-        UpdateExpression: 'SET data_added_investigations = list_append(data_added_investigations, :newInvestigation)',
+        ProjectionExpression: 'data_added_investigations'
+    };
+
+    const getResult = await dynamoDB.get(getParams).promise();
+
+    // Initialize the set if it doesn't exist
+    let dataAddedInvestigations = new Set<string>(getResult.Item?.data_added_investigations || []);
+
+    if (dataAddedInvestigations.has(investigationId)) {
+        throw new Error("Investigation data already exists for this investigation");        
+    }
+
+    // Add the new investigation ID to the set
+    dataAddedInvestigations.add(investigationId);
+
+    // Convert the set back to an array for storage
+    const updatedDataAddedInvestigations = Array.from(dataAddedInvestigations);
+
+    // Update the item in the database
+    const updateParams = {
+        TableName: 'InvestigationRegisterTable',
+        Key: { id: invRegId },
+        UpdateExpression: 'SET data_added_investigations = :updatedDataAddedInvestigations',
         ExpressionAttributeValues: {
-            ':newInvestigation': [investigationId]
+            ':updatedDataAddedInvestigations': updatedDataAddedInvestigations
         },
         ReturnValues: 'ALL_NEW'
     };
 
-    const result = await dynamoDB.update(params).promise();
-    return result.Attributes;
+    const updateResult = await dynamoDB.update(updateParams).promise();
+    return updateResult.Attributes;
 }

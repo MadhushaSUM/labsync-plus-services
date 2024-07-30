@@ -1,6 +1,6 @@
 import { Key } from "aws-sdk/clients/dynamodb";
 import { validateInvestigationRegister } from "../models/investigationRegistration";
-import { fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById, modifyInvestigationRegisterConfirmation, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
+import { addInvestigationToDataAdded, fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById, modifyInvestigationRegisterConfirmation, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
 
 export async function addInvestigationRegistration(invReg: any) {
     const addingInvReg = await validateInvestigationRegister(invReg);
@@ -27,4 +27,8 @@ export async function updateInvestigationRegistration(id: string, invReg: any) {
 
 export async function markInvestigationRegistrationConfirmed(id: string) {
     return await modifyInvestigationRegisterConfirmation(id, true);
+}
+
+export async function addInvestigationToDataAddedList(invRegId: string, investigationId: string) {
+    return await addInvestigationToDataAdded(invRegId, investigationId);
 }

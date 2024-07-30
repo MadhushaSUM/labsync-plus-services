@@ -67,7 +67,7 @@ export async function validateInvestigationRegister(invReg: any, isUpdate: boole
         date: invReg.date,
         patient_id: invReg.patient_id,
         doctor_id: invReg.doctor_id,
-        investigations: invReg.investigations,
+        investigations: Array.from(new Set(invReg.investigations)),
         data_added_investigations: [],
         cost: invReg.cost,
         is_confirmed: false
@@ -76,7 +76,7 @@ export async function validateInvestigationRegister(invReg: any, isUpdate: boole
 
     if (isUpdate) {
         verifiedInvReg.is_confirmed = invReg.is_confirmed;
-        verifiedInvReg.data_added_investigations = invReg.data_added_investigations;
+        verifiedInvReg.data_added_investigations = Array.from(new Set(invReg.data_added_investigations));
     }
 
     return verifiedInvReg;

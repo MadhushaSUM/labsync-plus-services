@@ -110,6 +110,14 @@ module "lambda_functions" {
       runtime     = "nodejs20.x"
       memory_size = 128
       timeout     = 5
+    },
+    {
+      name        = "add-investigation-data"     
+      handler     = "index.handler"  
+      filename    = "investigation-data/add-investigation-data/add-investigation-data.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
     }
   ]
 }
@@ -146,6 +154,15 @@ module "dynamodb_tables" {
     },
     {
       name           = "InvestigationRegisterTable"
+      hash_key       = "id"
+      read_capacity  = 5
+      write_capacity = 5
+      attributes = [
+        { name = "id", type = "S" }
+      ]
+    },
+    {
+      name           = "InvestigationDataTable"
       hash_key       = "id"
       read_capacity  = 5
       write_capacity = 5
