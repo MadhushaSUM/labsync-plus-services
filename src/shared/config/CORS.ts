@@ -1,0 +1,1 @@
+export const CROSS_ORIGIN = 'http://localhost:3000'
