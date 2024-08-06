@@ -5,7 +5,6 @@ export function validatePatient(patient: any) {
         !patient.id ||
         !patient.name ||
         !patient.gender ||
-        !patient.address ||
         !patient.date_of_birth ||
         !patient.contact_number
     ) {
@@ -16,7 +15,6 @@ export function validatePatient(patient: any) {
         id: patient.id,
         name: patient.name,
         gender: patient.gender,
-        address: patient.address,
         date_of_birth: patient.date_of_birth,
         contact_number: patient.contact_number,
     }

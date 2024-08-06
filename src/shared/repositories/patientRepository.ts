@@ -29,7 +29,7 @@ export async function fetchAllPatients(limit: number, lastEvaluatedKey: Key) {
     const params: ScanInput = {
         TableName: 'PatientTable',
         Limit: limit,
-        ExclusiveStartKey: lastEvaluatedKey
+        ExclusiveStartKey: lastEvaluatedKey        
     };
 
     const result = await dynamoDB.scan(params).promise();
@@ -43,14 +43,13 @@ export async function modifyPatient(id: string, patientDetails: PatientType) {
     const params = {
         TableName: 'PatientTable',
         Key: { id: id },
-        UpdateExpression: 'set #name = :name, gender = :gender, address = :address, date_of_birth = :dob, contact_number = :contact',
+        UpdateExpression: 'set #name = :name, gender = :gender, date_of_birth = :dob, contact_number = :contact',
         ExpressionAttributeNames: {
             '#name': 'name'
         },
         ExpressionAttributeValues: {
             ':name': patientDetails.name,
             ':gender': patientDetails.gender,
-            ':address': patientDetails.address,
             ':dob': patientDetails.date_of_birth,
             ':contact': patientDetails.contact_number
         },
