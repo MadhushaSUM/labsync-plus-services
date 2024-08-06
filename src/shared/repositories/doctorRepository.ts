@@ -1,58 +1,66 @@
-import AWS from 'aws-sdk';
 import { DoctorType } from '../types/doctor';
-import { Key, ScanInput } from 'aws-sdk/clients/dynamodb';
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+import pool from '../lib/db';
 
 export async function saveDoctor(doctor: DoctorType) {
-    const params = {
-        TableName: 'DoctorTable',
-        Item: doctor
-    };
+    const query = `
+        INSERT INTO public."Doctor" (name)
+        VALUES ($1)
+        RETURNING *;
+    `;
+    const values = [doctor.name];
 
-    await dynamoDB.put(params).promise();
-    return doctor;
+    const result = await pool.query(query, values);
+    return result.rows[0];
 }
 
-export async function fetchDoctorById(doctorId: string) {
-    const params = {
-        TableName: 'DoctorTable',
-        Key: {
-            id: doctorId
-        }
-    };
+export async function fetchDoctorById(doctorId: number) {
+    const query = `
+        SELECT * FROM  public."Doctor"
+        WHERE id = $1;
+    `;
 
-    const result = await dynamoDB.get(params).promise();
-    return result.Item;
+    const { rows } = await pool.query(query, [doctorId]);
+    return rows[0];
 }
 
-export async function fetchAllDoctors(limit: number, lastEvaluatedKey: Key) {
-    const params: ScanInput = {
-        TableName: 'DoctorTable',
-        Limit: limit,
-        ExclusiveStartKey: lastEvaluatedKey
-    };
+export async function fetchAllDoctors(limit: number, offset: number) {
+    const query = `
+        SELECT * FROM public."Doctor"
+        ORDER BY id
+        LIMIT $1 OFFSET $2;
+    `;
 
-    const result = await dynamoDB.scan(params).promise();
+    const { rows: doctors } = await pool.query(query, [limit, offset]);
+
+    const countQuery = 'SELECT COUNT(*) FROM public."Doctor"';
+    const { rows: countRows } = await pool.query(countQuery);
+    const totalCount = parseInt(countRows[0].count, 10);
+
+    // // Calculate the next offset for pagination
+    // const nextOffset = offset + limit < totalCount ? offset + limit : null;
+
+    // Total pages
+    const totalPages = Math.ceil(totalCount / limit);
+
     return {
-        doctors: result.Items,
-        lastEvaluatedKey: result.LastEvaluatedKey
+        doctors,
+        totalCount,
+        totalPages
     };
 }
 
-export async function modifyDoctor(id: string, doctorDetails: DoctorType) {
-    const params = {
-        TableName: 'DoctorTable',
-        Key: { id: id },
-        UpdateExpression: 'set #name = :name',
-        ExpressionAttributeNames: {
-            '#name': 'name'
-        },
-        ExpressionAttributeValues: {
-            ':name': doctorDetails.name
-        },
-        ReturnValues: 'ALL_NEW'
-    };
+export async function modifyDoctor(id: number, doctorDetails: DoctorType) {
+    const query = `
+        UPDATE public."Doctor"
+        SET name = $1
+        WHERE id = $2
+        RETURNING *;
+    `;
 
-    const result = await dynamoDB.update(params).promise();
-    return result.Attributes;
+    const { rows } = await pool.query(query, [
+        doctorDetails.name,
+        id
+    ]);
+
+    return rows[0];
 }

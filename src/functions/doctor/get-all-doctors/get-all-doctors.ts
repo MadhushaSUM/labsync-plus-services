@@ -2,10 +2,10 @@ import { CROSS_ORIGIN } from "../../../shared/config/CORS";
 import { getAllDoctors } from "../../../shared/services/doctorService";
 
 export const handler = async (event: any) => {
-    const { limit, lastEvaluatedKey } = JSON.parse(event.body);
+    const { limit, offset } = event.queryStringParameters;
 
     try {
-        const result = await getAllDoctors(limit, lastEvaluatedKey);
+        const result = await getAllDoctors(limit, offset);
         return {
             statusCode: 200,
             headers: {
@@ -13,7 +13,7 @@ export const handler = async (event: any) => {
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT',
             },
-            body: JSON.stringify({ content: result.doctors })
+            body: JSON.stringify({ content: result.doctors, totalPages: result.totalPages, totalElements: result.totalCount })
         };
     } catch (error: any) {
         return {

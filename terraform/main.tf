@@ -39,38 +39,38 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 5
     },
-    # {
-    #   name        = "create-doctor"
-    #   handler     = "index.handler"
-    #   filename    = "doctor/create-doctor/create-doctor.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "update-doctor"     
-    #   handler     = "index.handler"  
-    #   filename    = "doctor/update-doctor/update-doctor.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "get-all-doctors"     
-    #   handler     = "index.handler"  
-    #   filename    = "doctor/get-all-doctors/get-all-doctors.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "get-doctor-by-id"     
-    #   handler     = "index.handler"  
-    #   filename    = "doctor/get-doctor-by-id/get-doctor-by-id.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
+    {
+      name        = "create-doctor"
+      handler     = "index.handler"
+      filename    = "doctor/create-doctor/create-doctor.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "update-doctor"     
+      handler     = "index.handler"  
+      filename    = "doctor/update-doctor/update-doctor.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-all-doctors"     
+      handler     = "index.handler"  
+      filename    = "doctor/get-all-doctors/get-all-doctors.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-doctor-by-id"     
+      handler     = "index.handler"  
+      filename    = "doctor/get-doctor-by-id/get-doctor-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
     # {
     #   name        = "get-investigation-by-id"     
     #   handler     = "index.handler"  

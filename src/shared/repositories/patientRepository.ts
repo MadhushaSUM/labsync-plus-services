@@ -1,7 +1,5 @@
-import AWS from 'aws-sdk';
 import { PatientType } from '../types/patient';
 import pool from '../lib/db';
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 export async function savePatient(patient: PatientType) {
     const query = `
@@ -41,8 +39,8 @@ export async function fetchAllPatients(limit: number, offset: number) {
     const { rows: countRows } = await pool.query(countQuery);
     const totalCount = parseInt(countRows[0].count, 10);
 
-    // Calculate the next offset for pagination
-    const nextOffset = offset + limit < totalCount ? offset + limit : null;
+    // // Calculate the next offset for pagination
+    // const nextOffset = offset + limit < totalCount ? offset + limit : null;
 
     // Total pages
     const totalPages = Math.ceil(totalCount / limit);

@@ -1,4 +1,3 @@
-import { Key } from "aws-sdk/clients/dynamodb";
 import { validateDoctor } from "../models/doctor";
 import { fetchAllDoctors, fetchDoctorById, modifyDoctor, saveDoctor } from "../repositories/doctorRepository";
 
@@ -8,18 +7,18 @@ export async function addDoctor(Doctor: any) {
     return await saveDoctor(addingDoctor);
 }
 
-export async function getDoctorById(DoctorId: string) {
+export async function getDoctorById(DoctorId: number) {
     if (DoctorId == undefined) {
         throw new Error("Doctor id must be defined");
     }
     return await fetchDoctorById(DoctorId);
 }
 
-export async function getAllDoctors(limit: number, lastEvaluatedKey: Key) {
-    return await fetchAllDoctors(limit, lastEvaluatedKey);
+export async function getAllDoctors(limit: number, offset: number) {
+    return await fetchAllDoctors(limit, offset);
 }
 
-export async function updateDoctor(id: string, DoctorDetails: any) {
+export async function updateDoctor(id: number, DoctorDetails: any) {
     const updatingDoctor = validateDoctor(DoctorDetails);
 
     return await modifyDoctor(id, updatingDoctor);
