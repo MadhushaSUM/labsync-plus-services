@@ -1,4 +1,3 @@
-import { Key } from "aws-sdk/clients/dynamodb";
 import { validatePatient } from "../models/patient";
 import { fetchAllPatients, fetchPatientById, modifyPatient, savePatient } from "../repositories/patientRepository";
 
@@ -15,8 +14,8 @@ export async function getPatientById(patientId: string) {
     return await fetchPatientById(patientId);
 }
 
-export async function getAllPatients(limit: number, lastEvaluatedKey: Key) {
-    return await fetchAllPatients(limit, lastEvaluatedKey);
+export async function getAllPatients(limit: number, offset: number) {
+    return await fetchAllPatients(limit, offset);
 }
 
 export async function updatePatient(id: string, patientDetails: any) {

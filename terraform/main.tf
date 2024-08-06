@@ -23,14 +23,14 @@ module "lambda_functions" {
     #   memory_size = 128
     #   timeout     = 5
     # },
-    # {
-    #   name        = "get-all-patients"     
-    #   handler     = "index.handler"  
-    #   filename    = "patient/get-all-patients/get-all-patients.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
+    {
+      name        = "get-all-patients"     
+      handler     = "index.handler"  
+      filename    = "patient/get-all-patients/get-all-patients.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
     # {
     #   name        = "get-patient-by-id"     
     #   handler     = "index.handler"  

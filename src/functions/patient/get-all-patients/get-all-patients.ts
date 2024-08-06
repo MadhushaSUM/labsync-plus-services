@@ -2,11 +2,9 @@ import { CROSS_ORIGIN } from "../../../shared/config/CORS";
 import { getAllPatients } from "../../../shared/services/patientService";
 
 export const handler = async (event: any) => {
-    const limit = event.queryStringParameters.limit;
-    const lastEvaluatedKey = event.queryStringParameters.lastEvaluatedKey ? JSON.parse(event.queryStringParameters.lastEvaluatedKey) : null;
-
+    const { limit, offset } = event.queryStringParameters;
     try {
-        const result = await getAllPatients(limit, lastEvaluatedKey);
+        const result = await getAllPatients(limit, offset);
         return {
             statusCode: 200,
             headers: {

@@ -1,6 +1,5 @@
 import AWS from 'aws-sdk';
 import { PatientType } from '../types/patient';
-import { Key, ScanInput } from 'aws-sdk/clients/dynamodb';
 import pool from '../lib/db';
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
@@ -11,7 +10,7 @@ export async function savePatient(patient: PatientType) {
         RETURNING *;
     `;
     const values = [patient.name, patient.gender, patient.date_of_birth, patient.contact_number];
-    
+
     const result = await pool.query(query, values);
     return result.rows[0];
 }
@@ -28,17 +27,32 @@ export async function fetchPatientById(patientId: string) {
     return result.Item;
 }
 
-export async function fetchAllPatients(limit: number, lastEvaluatedKey: Key) {
-    const params: ScanInput = {
-        TableName: 'PatientTable',
-        Limit: limit,
-        ExclusiveStartKey: lastEvaluatedKey        
-    };
+export async function fetchAllPatients(limit: number, offset: number) {
+    // Define the SQL query with LIMIT and OFFSET
+    const query = `
+        SELECT * FROM public."Patient"
+        ORDER BY id
+        LIMIT $1 OFFSET $2;
+    `;
 
-    const result = await dynamoDB.scan(params).promise();
+    // Execute the query
+    const { rows: patients } = await pool.query(query, [limit, offset]);
+
+    // Get the total count of rows for pagination
+    const countQuery = 'SELECT COUNT(*) FROM public."Patient"';
+    const { rows: countRows } = await pool.query(countQuery);
+    const totalCount = parseInt(countRows[0].count, 10);
+
+    // Calculate the next offset for pagination
+    const nextOffset = offset + limit < totalCount ? offset + limit : null;
+
+    // Total pages
+    const totalPages = totalCount / limit;
+
     return {
-        patients: result.Items,
-        lastEvaluatedKey: result.LastEvaluatedKey
+        patients,
+        nextOffset,
+        totalPages
     };
 }
 
