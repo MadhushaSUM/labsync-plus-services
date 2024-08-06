@@ -1,16 +1,19 @@
 import AWS from 'aws-sdk';
 import { PatientType } from '../types/patient';
 import { Key, ScanInput } from 'aws-sdk/clients/dynamodb';
+import pool from '../lib/db';
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 export async function savePatient(patient: PatientType) {
-    const params = {
-        TableName: 'PatientTable',
-        Item: patient
-    };
-
-    await dynamoDB.put(params).promise();
-    return patient;
+    const query = `
+        INSERT INTO public."Patient" (name, gender, date_of_birth, contact_number)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *;
+    `;
+    const values = [patient.name, patient.gender, patient.date_of_birth, patient.contact_number];
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
 }
 
 export async function fetchPatientById(patientId: string) {

@@ -2,7 +2,7 @@ import { PatientType } from "../types/patient";
 
 export function validatePatient(patient: any) {
     if (
-        !patient.id ||
+        // !patient.id ||
         !patient.name ||
         !patient.gender ||
         !patient.date_of_birth ||
@@ -12,7 +12,7 @@ export function validatePatient(patient: any) {
     }
 
     const verifiedPatient: PatientType = {
-        id: patient.id,
+        // id: patient.id,
         name: patient.name,
         gender: patient.gender,
         date_of_birth: patient.date_of_birth,
