@@ -15,14 +15,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 5
     },
-    # {
-    #   name        = "update-patient"     
-    #   handler     = "index.handler"  
-    #   filename    = "patient/update-patient/update-patient.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
+    {
+      name        = "update-patient"     
+      handler     = "index.handler"  
+      filename    = "patient/update-patient/update-patient.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
     {
       name        = "get-all-patients"     
       handler     = "index.handler"  
@@ -31,14 +31,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 5
     },
-    # {
-    #   name        = "get-patient-by-id"     
-    #   handler     = "index.handler"  
-    #   filename    = "patient/get-patient-by-id/get-patient-by-id.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
+    {
+      name        = "get-patient-by-id"     
+      handler     = "index.handler"  
+      filename    = "patient/get-patient-by-id/get-patient-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
     # {
     #   name        = "create-doctor"
     #   handler     = "index.handler"

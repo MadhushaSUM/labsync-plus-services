@@ -15,16 +15,14 @@ export async function savePatient(patient: PatientType) {
     return result.rows[0];
 }
 
-export async function fetchPatientById(patientId: string) {
-    const params = {
-        TableName: 'PatientTable',
-        Key: {
-            id: patientId
-        }
-    };
+export async function fetchPatientById(patientId: number) {
+    const query = `
+        SELECT * FROM public."Patient"
+        WHERE id = $1;
+    `;
 
-    const result = await dynamoDB.get(params).promise();
-    return result.Item;
+    const { rows } = await pool.query(query, [patientId]);
+    return rows[0];
 }
 
 export async function fetchAllPatients(limit: number, offset: number) {
@@ -56,23 +54,21 @@ export async function fetchAllPatients(limit: number, offset: number) {
     };
 }
 
-export async function modifyPatient(id: string, patientDetails: PatientType) {
-    const params = {
-        TableName: 'PatientTable',
-        Key: { id: id },
-        UpdateExpression: 'set #name = :name, gender = :gender, date_of_birth = :dob, contact_number = :contact',
-        ExpressionAttributeNames: {
-            '#name': 'name'
-        },
-        ExpressionAttributeValues: {
-            ':name': patientDetails.name,
-            ':gender': patientDetails.gender,
-            ':dob': patientDetails.date_of_birth,
-            ':contact': patientDetails.contact_number
-        },
-        ReturnValues: 'ALL_NEW'
-    };
+export async function modifyPatient(id: number, patientDetails: PatientType) {
+    const query = `
+        UPDATE public."Patient"
+        SET name = $1, gender = $2, date_of_birth = $3, contact_number = $4
+        WHERE id = $5
+        RETURNING *;
+    `;
 
-    const result = await dynamoDB.update(params).promise();
-    return result.Attributes;
+    const { rows } = await pool.query(query, [
+        patientDetails.name,
+        patientDetails.gender,
+        patientDetails.date_of_birth,
+        patientDetails.contact_number,
+        id
+    ]);
+
+    return rows[0];
 }

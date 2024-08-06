@@ -7,7 +7,7 @@ export async function addPatient(patient: any) {
     return await savePatient(addingPatient);
 }
 
-export async function getPatientById(patientId: string) {
+export async function getPatientById(patientId: number) {
     if (patientId == undefined) {
         throw new Error("Patient id must be defined");
     }
@@ -18,7 +18,7 @@ export async function getAllPatients(limit: number, offset: number) {
     return await fetchAllPatients(limit, offset);
 }
 
-export async function updatePatient(id: string, patientDetails: any) {
+export async function updatePatient(id: number, patientDetails: any) {
     const updatingPatient = validatePatient(patientDetails);
 
     return await modifyPatient(id, updatingPatient);
