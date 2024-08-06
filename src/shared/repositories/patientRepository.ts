@@ -47,7 +47,7 @@ export async function fetchAllPatients(limit: number, offset: number) {
     const nextOffset = offset + limit < totalCount ? offset + limit : null;
 
     // Total pages
-    const totalPages = totalCount / limit;
+    const totalPages = Math.ceil(totalCount / limit);
 
     return {
         patients,
