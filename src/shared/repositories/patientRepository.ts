@@ -51,7 +51,7 @@ export async function fetchAllPatients(limit: number, offset: number) {
 
     return {
         patients,
-        nextOffset,
+        totalCount,
         totalPages
     };
 }

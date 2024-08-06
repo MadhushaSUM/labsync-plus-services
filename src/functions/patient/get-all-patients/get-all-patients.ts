@@ -12,7 +12,7 @@ export const handler = async (event: any) => {
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT',
             },
-            body: JSON.stringify({ content: result.patients })
+            body: JSON.stringify({ content: result.patients, totalPages: result.totalPages, totalElements: result.totalCount })
         };
     } catch (error: any) {
         return {
