@@ -2,12 +2,11 @@ import { CROSS_ORIGIN } from "../../../shared/config/CORS";
 import { updateInvestigationData } from "../../../shared/services/investigationDataService";
 
 export const handler = async (event: any) => {
-    const { id } = event.pathParameters;
-    const { investigationId } = event.queryStringParameters;
+    const { investigationRegisterId, investigationId } = event.queryStringParameters;
     const inverstigationDataDetails = JSON.parse(event.body);
 
     try {
-        const result = await updateInvestigationData(id, investigationId, inverstigationDataDetails);
+        const result = await updateInvestigationData(investigationRegisterId, investigationId, inverstigationDataDetails);
         return {
             statusCode: 200,
             headers: {

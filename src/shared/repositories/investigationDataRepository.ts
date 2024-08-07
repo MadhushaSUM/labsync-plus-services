@@ -1,48 +1,62 @@
-import AWS from 'aws-sdk';
 import { InvestigationData } from '../types/investigationData';
 import { InvestigationBase } from '../models/investigation/investigationBase';
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+import pool from '../lib/db';
 
 export async function saveInvestigationData(investigation_data: InvestigationData) {
-    const params = {
-        TableName: 'InvestigationDataTable',
-        Item: investigation_data
-    };
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    await dynamoDB.put(params).promise();
-    return investigation_data;
+        const result = await client.query(
+            `INSERT INTO public."Investigation data"(registration_id, investigation_id, data)
+	        VALUES ($1, $2, $3)`,
+            [investigation_data.investigation_registration_id, investigation_data.investigation_id, investigation_data.data]
+        );
 
+        await client.query(
+            `INSERT INTO public."Data Added Investigations" (registration_id, investigation_id)
+            VALUES ($1, $2)`,
+            [investigation_data.investigation_registration_id, investigation_data.investigation_id]
+        );
+
+        await client.query('COMMIT');
+
+        return result;
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 
-export async function fetchInvestigationData(investigationRegisterId: string, investigationId: string) {
-    const params = {
-        TableName: 'InvestigationDataTable',
-        FilterExpression: 'investigation_registration_id = :irId AND investigation_id = :iId',
-        ExpressionAttributeValues: {
-            ':irId': investigationRegisterId,
-            ':iId': investigationId
-        }
-    };
+export async function fetchInvestigationData(investigationRegisterId: number, investigationId: number) {
+    try {
+        const regResult = await pool.query(
+            `SELECT * FROM public."Investigation data"
+            WHERE registration_id = $1 AND investigation_id = $2`,
+            [investigationRegisterId, investigationId]
+        );
     
-    //TODO: Not efficient to use scan here
-    const result = await dynamoDB.scan(params).promise();
-    return result.Items;
+        return regResult.rows[0];
+    } catch (error: any) {
+        throw new Error(error.message);
+    }
 }
 
-export async function modifyInvestigationData(id: string, investigationData: InvestigationBase) {
-    const params = {
-        TableName: 'InvestigationDataTable',
-        Key: { id: id },
-        UpdateExpression: 'set #data = :data',
-        ExpressionAttributeNames: {
-            '#data': 'data'
-        },
-        ExpressionAttributeValues: {
-            ':data': investigationData
-        },
-        ReturnValues: 'ALL_NEW'
-    };
+export async function modifyInvestigationData(invRegId: number, investigationId: number, investigationData: InvestigationBase) {
+    const query = `
+        UPDATE public."Investigation data"
+        SET data = $1
+        WHERE registration_id = $2 AND investigation_id = $3
+        RETURNING *;
+    `;
 
-    const result = await dynamoDB.update(params).promise();
-    return result.Attributes;
+    const { rows } = await pool.query(query, [
+        investigationData,
+        invRegId,
+        investigationId
+    ]);
+
+    return rows[0];
 }

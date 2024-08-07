@@ -79,62 +79,62 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 5
     },
-    # {
-    #   name        = "add-investigation-registration"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-register/add-investigation-registration/add-investigation-registration.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "update-investigation-registration"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-register/update-investigation-registration/update-investigation-registration.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "get-all-investigation-registrations"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-register/get-all-investigation-registrations/get-all-investigation-registrations.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "confirm-investigation-registration"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-register/confirm-investigation-registration/confirm-investigation-registration.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "add-investigation-data"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-data/add-investigation-data/add-investigation-data.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "get-investigation-data"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-data/get-investigation-data/get-investigation-data.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
-    # {
-    #   name        = "update-investigation-data"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation-data/update-investigation-data/update-investigation-data.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # }
+    {
+      name        = "add-investigation-registration"     
+      handler     = "index.handler"  
+      filename    = "investigation-register/add-investigation-registration/add-investigation-registration.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "update-investigation-registration"     
+      handler     = "index.handler"  
+      filename    = "investigation-register/update-investigation-registration/update-investigation-registration.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-all-investigation-registrations"     
+      handler     = "index.handler"  
+      filename    = "investigation-register/get-all-investigation-registrations/get-all-investigation-registrations.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "confirm-investigation-registration"     
+      handler     = "index.handler"  
+      filename    = "investigation-register/confirm-investigation-registration/confirm-investigation-registration.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "add-investigation-data"     
+      handler     = "index.handler"  
+      filename    = "investigation-data/add-investigation-data/add-investigation-data.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "get-investigation-data"     
+      handler     = "index.handler"  
+      filename    = "investigation-data/get-investigation-data/get-investigation-data.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
+      name        = "update-investigation-data"     
+      handler     = "index.handler"  
+      filename    = "investigation-data/update-investigation-data/update-investigation-data.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    }
   ]
 }
 

@@ -1,126 +1,254 @@
-import AWS from 'aws-sdk';
 import { InvestigationRegistrationType } from '../types/investigationRegistration';
-import { AttributeValue, Key, ScanInput } from 'aws-sdk/clients/dynamodb';
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+import pool from '../lib/db';
 
 export async function saveInvestigationRegistration(invReg: InvestigationRegistrationType) {
-    const params = {
-        TableName: 'InvestigationRegisterTable',
-        Item: invReg
-    };
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    await dynamoDB.put(params).promise();
-    return invReg;
-}
+        // Insert into Investigation Registration
+        const result = await client.query(
+            `INSERT INTO public."Investigation Registration" (date, patient_id, doctor_id, cost, is_confirmed)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id`,
+            [invReg.date, invReg.patient_id, invReg.doctor_id, invReg.cost, invReg.is_confirmed]
+        );
 
-export async function fetchInvestigationRegistrationById(invRegId: string) {
-    const params = {
-        TableName: 'InvestigationRegisterTable',
-        Key: {
-            id: invRegId
-        }
-    };
+        const registrationId = result.rows[0].id;
 
-    const result = await dynamoDB.get(params).promise();
-    return result.Item as InvestigationRegistrationType;
-}
+        // Insert into Registered Investigations
+        const registeredInvestigations = invReg.investigations.map(id => `(${registrationId}, ${id})`).join(', ');
+        const registeredInvestigationsQuery = `INSERT INTO public."Registered Investigations" (registration_id, investigation_id) VALUES ${registeredInvestigations}`;
+        await client.query(registeredInvestigationsQuery);
 
-export async function modifyInvestigationRegistration(id: string, invReg: InvestigationRegistrationType) {
-    const params = {
-        TableName: 'InvestigationRegisterTable',
-        Key: { id: id },
-        UpdateExpression: 'set #patient_id = :patient_id, doctor_id = :doctor_id, #date = :date, investigations = :investigations, data_added_investigations = :data_added_investigations, cost = :cost, is_confirmed = :is_confirmed',
-        ExpressionAttributeNames: {
-            '#patient_id': 'patient_id',
-            '#date': 'date'
-        },
-        ExpressionAttributeValues: {
-            ':patient_id': invReg.patient_id,
-            ':doctor_id': invReg.doctor_id,
-            ':date': invReg.date,
-            ':investigations': invReg.investigations,
-            ':data_added_investigations': invReg.data_added_investigations,
-            ':cost': invReg.cost,
-            ':is_confirmed': invReg.is_confirmed
-        },
-        ReturnValues: 'ALL_NEW'
-    };
+        await client.query('COMMIT');
 
-    const result = await dynamoDB.update(params).promise();
-    return result.Attributes;
-}
-
-export async function fetchAllInvestigationRegistrations(limit: number, lastEvaluatedKey: any, filterUnconfirmed: boolean = false) {
-    const params: ScanInput = {
-        TableName: 'InvestigationRegisterTable',
-        Limit: limit,
-        ExclusiveStartKey: lastEvaluatedKey,
-    };
-
-    if (filterUnconfirmed) {
-        params.FilterExpression = 'is_confirmed = :is_confirmed';
-        params.ExpressionAttributeValues = {
-            ':is_confirmed': false as unknown as AttributeValue
+        return {
+            ...invReg,
+            id: registrationId
         };
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
     }
-
-    const result = await dynamoDB.scan(params).promise();
-    return {
-        items: result.Items,
-        lastEvaluatedKey: result.LastEvaluatedKey
-    };
 }
 
+export async function fetchInvestigationRegistrationById(id: number): Promise<InvestigationRegistrationType | null> {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-export async function modifyInvestigationRegisterConfirmation(invRegId: string, confirmed: boolean) {
-    const params = {
-        TableName: 'InvestigationRegisterTable',
-        Key: { id: invRegId },
-        UpdateExpression: 'set is_confirmed = :is_confirmed',
-        ExpressionAttributeValues: {
-            ':is_confirmed': confirmed
-        },
-        ReturnValues: 'ALL_NEW'
-    };
+        const regResult = await client.query(
+            `SELECT id, date, patient_id, doctor_id, cost, is_confirmed, branch_id
+            FROM public."Investigation Registration"
+            WHERE id = $1`,
+            [id]
+        );
 
-    const result = await dynamoDB.update(params).promise();
-    return result.Attributes;
+        if (regResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return null; // Return null if no record found
+        }
+
+        const registration = regResult.rows[0];
+
+        const registeredInvestigationsResult = await client.query(
+            `SELECT investigation_id
+            FROM public."Registered Investigations"
+            WHERE registration_id = $1`,
+            [id]
+        );
+        const investigations = registeredInvestigationsResult.rows.map(row => row.investigation_id);
+
+        const dataAddedInvestigationsResult = await client.query(
+            `SELECT investigation_id
+            FROM public."Data Added Investigations"
+            WHERE registration_id = $1`,
+            [id]
+        );
+        const dataAddedInvestigations = dataAddedInvestigationsResult.rows.map(row => row.investigation_id);
+
+        await client.query('COMMIT');
+
+        return {
+            ...registration,
+            investigations,
+            data_added_investigations: dataAddedInvestigations
+        };
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 
-export async function addInvestigationToDataAdded(invRegId: string, investigationId: string) {
-    // Retrieve the existing item to get the current data_added_investigations set
-    const getParams = {
-        TableName: 'InvestigationRegisterTable',
-        Key: { id: invRegId },
-        ProjectionExpression: 'data_added_investigations'
-    };
+export async function modifyInvestigationRegistration(id: number, invReg: InvestigationRegistrationType) {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    const getResult = await dynamoDB.get(getParams).promise();
+        // Update the Investigation Registration record
+        await client.query(
+            `UPDATE public."Investigation Registration"
+            SET date = $1, patient_id = $2, doctor_id = $3, cost = $4, is_confirmed = $5
+            WHERE id = $6`,
+            [invReg.date, invReg.patient_id, invReg.doctor_id, invReg.cost, invReg.is_confirmed, id]
+        );
 
-    // Initialize the set if it doesn't exist
-    let dataAddedInvestigations = new Set<string>(getResult.Item?.data_added_investigations || []);
+        // Remove old registered investigations
+        await client.query(
+            `DELETE FROM public."Registered Investigations"
+            WHERE registration_id = $1`,
+            [id]
+        );
 
-    if (dataAddedInvestigations.has(investigationId)) {
-        throw new Error("Investigation data already exists for this investigation");        
+        // Insert new registered investigations
+        const registeredInvestigations = invReg.investigations.map(id => [id, id]); // [(registrationId, investigationId)]
+        if (registeredInvestigations.length > 0) {
+            const registeredInvestigationsQuery = `INSERT INTO public."Registered Investigations" (registration_id, investigation_id) VALUES ${registeredInvestigations.map((_, i) => `($1, $${i + 2})`).join(', ')}`;
+            await client.query(registeredInvestigationsQuery, [id, ...invReg.investigations]);
+        }
+
+        // Remove old data added investigations
+        await client.query(
+            `DELETE FROM public."Data Added Investigations"
+            WHERE registration_id = $1`,
+            [id]
+        );
+
+        // Insert new data added investigations
+        const dataAddedInvestigations = invReg.data_added_investigations.map(id => [id, id]); // [(registrationId, investigationId)]
+        if (dataAddedInvestigations.length > 0) {
+            const dataAddedInvestigationsQuery = `INSERT INTO public."Data Added Investigations" (registration_id, investigation_id) VALUES ${dataAddedInvestigations.map((_, i) => `($1, $${i + 2})`).join(', ')}`;
+            await client.query(dataAddedInvestigationsQuery, [id, ...invReg.data_added_investigations]);
+        }
+
+        await client.query('COMMIT');
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
     }
+}
 
-    // Add the new investigation ID to the set
-    dataAddedInvestigations.add(investigationId);
+export async function fetchAllInvestigationRegistrations(limit: number, offset: number, filterUnconfirmed: boolean = false) {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    // Convert the set back to an array for storage
-    const updatedDataAddedInvestigations = Array.from(dataAddedInvestigations);
+        let query = `SELECT id, date, patient_id, doctor_id, cost, is_confirmed, branch_id
+                     FROM public."Investigation Registration"`;
+        const queryParams: any[] = [];
 
-    // Update the item in the database
-    const updateParams = {
-        TableName: 'InvestigationRegisterTable',
-        Key: { id: invRegId },
-        UpdateExpression: 'SET data_added_investigations = :updatedDataAddedInvestigations',
-        ExpressionAttributeValues: {
-            ':updatedDataAddedInvestigations': updatedDataAddedInvestigations
-        },
-        ReturnValues: 'ALL_NEW'
-    };
+        if (filterUnconfirmed) {
+            query += ' WHERE is_confirmed = false';
+        }
 
-    const updateResult = await dynamoDB.update(updateParams).promise();
-    return updateResult.Attributes;
+        query += ' ORDER BY date DESC';
+        query += ' LIMIT $1 OFFSET $2';
+
+        queryParams.push(limit, offset);
+
+        const result = await client.query(query, queryParams);
+
+        const registrations = result.rows;
+
+        const registrationIds = registrations.map(reg => reg.id);
+
+        if (registrationIds.length === 0) {
+            await client.query('COMMIT');
+            return registrations.map(reg => ({
+                ...reg,
+                investigations: [],
+                data_added_investigations: []
+            }));
+        }
+
+        // Fetch registered investigations
+        const registeredInvestigationsResult = await client.query(
+            `SELECT registration_id, investigation_id
+            FROM public."Registered Investigations"
+            WHERE registration_id = ANY($1::int[])`,
+            [registrationIds]
+        );
+
+        // Fetch data added investigations
+        const dataAddedInvestigationsResult = await client.query(
+            `SELECT registration_id, investigation_id
+            FROM public."Data Added Investigations"
+            WHERE registration_id = ANY($1::int[])`,
+            [registrationIds]
+        );
+
+        // Commit the transaction
+        await client.query('COMMIT');
+
+        // Map the results into the desired format
+        return registrations.map(reg => {
+            const registeredInvestigations = registeredInvestigationsResult.rows
+                .filter(row => row.registration_id === reg.id)
+                .map(row => row.investigation_id);
+
+            const dataAddedInvestigations = dataAddedInvestigationsResult.rows
+                .filter(row => row.registration_id === reg.id)
+                .map(row => row.investigation_id);
+
+            return {
+                ...reg,
+                investigations: registeredInvestigations,
+                data_added_investigations: dataAddedInvestigations
+            };
+        });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+export async function modifyInvestigationRegisterConfirmation(invRegId: number, confirmed: boolean) {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const result = await client.query(
+            `UPDATE public."Investigation Registration"
+            SET is_confirmed = $1
+            WHERE id = $2`,
+            [confirmed, invRegId]
+        );
+
+        if (result.rowCount === 0) {
+            throw new Error('No record found with the provided ID');
+        }
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+export async function addInvestigationToDataAdded(invRegId: number, investigationId: number) {
+    try {
+
+        const result = await pool.query(
+            `INSERT INTO public."Data Added Investigations" (registration_id, investigation_id)
+            VALUES ($1, $2)`,
+            [invRegId, investigationId]
+        );
+
+        return result;
+
+    } catch (error) {
+        throw error;
+    }
 }

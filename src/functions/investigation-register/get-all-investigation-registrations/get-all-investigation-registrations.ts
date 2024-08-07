@@ -2,10 +2,10 @@ import { CROSS_ORIGIN } from "../../../shared/config/CORS";
 import { getAllInvestigationRegistrations } from "../../../shared/services/investigationRegistrationService";
 
 export const handler = async (event: any) => {
-    const { limit, lastEvaluatedKey, filterUnconfirmed } = JSON.parse(event.body);
+    const { limit, offset, filterUnconfirmed } = event.queryStringParameters;
 
     try {
-        const result = await getAllInvestigationRegistrations(limit, lastEvaluatedKey, filterUnconfirmed);
+        const result = await getAllInvestigationRegistrations(limit, offset, filterUnconfirmed);
         return {
             statusCode: 200,
             headers: {

@@ -1,10 +1,10 @@
 export interface InvestigationRegistrationType {
-    id: string;
+    id?: number;
     date: string;
     patient_id: string;
     doctor_id: string;
-    investigations: string[];
-    data_added_investigations: string[];
+    investigations: number[];
+    data_added_investigations: number[];
     cost: number;
     is_confirmed: boolean;
     // branch_id: string;

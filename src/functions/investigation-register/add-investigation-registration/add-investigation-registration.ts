@@ -15,7 +15,7 @@ export const handler = async (event: any) => {
             },
             body: JSON.stringify({ message: 'Investigation registration added successfully', content: result })
         };
-    } catch (error: any) {
+    } catch (error: any) { 
         return {
             statusCode: 500,
             headers: {
