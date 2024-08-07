@@ -1,30 +1,30 @@
-import AWS from 'aws-sdk';
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+import pool from '../lib/db';
+import { InvestigationType } from '../types/Investigation';
 
-export async function fetchInvestigationById(investigationId: string) {
-    const params = {
-        TableName: 'InvestigationTable',
-        Key: {
-            id: investigationId
-        }
-    };
+export async function fetchInvestigationById(investigationId: number) {
+    const query = `
+        SELECT * FROM public."Investigation"
+        WHERE id = $1;
+    `;
 
-    const result = await dynamoDB.get(params).promise();
-    return result.Item;
+    const { rows } = await pool.query(query, [investigationId]);
+    return rows[0];
 }
 
-export async function fetchInvestigationsByIds(ids: string[]) {
+export async function fetchInvestigationsByIds(ids: number[]) {
     const uniqueIds = Array.from(new Set(ids));
-    const keys = uniqueIds.map(id => ({ id }));
-    const params = {
-        RequestItems: {
-            InvestigationTable: {
-                Keys: keys
-            }
-        }
-    };
 
-    const result = await dynamoDB.batchGet(params).promise();
+    if (uniqueIds.length === 0) {
+        return [];
+    }
 
-    return result;
+    const query = `
+        SELECT * FROM public."Investigation"
+        WHERE id = ANY($1::int[]);
+    `;
+
+    // Execute the query
+    const { rows } = await pool.query(query, [uniqueIds]);
+
+    return rows as InvestigationType[];
 }

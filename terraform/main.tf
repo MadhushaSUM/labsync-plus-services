@@ -71,14 +71,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 5
     },
-    # {
-    #   name        = "get-investigation-by-id"     
-    #   handler     = "index.handler"  
-    #   filename    = "investigation/get-investigation-by-id/get-investigation-by-id.zip"
-    #   runtime     = "nodejs20.x"
-    #   memory_size = 128
-    #   timeout     = 5
-    # },
+    {
+      name        = "get-investigation-by-id"     
+      handler     = "index.handler"  
+      filename    = "investigation/get-investigation-by-id/get-investigation-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
     # {
     #   name        = "add-investigation-registration"     
     #   handler     = "index.handler"  

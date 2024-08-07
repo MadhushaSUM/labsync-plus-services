@@ -1,5 +1,5 @@
 export interface InvestigationType {
-    id: string;
+    id: number;
     name: string;
     code: string;
     specimen: string;
