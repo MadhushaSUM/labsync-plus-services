@@ -1,1 +1,1 @@
-export const CROSS_ORIGIN = 'http://localhost:3000'; 
+export const CROSS_ORIGIN = ['http://localhost:3000', 'http://www.localhost:3000']; 

@@ -1,5 +1,6 @@
 import { validateInvestigationRegister } from "../models/investigationRegistration";
 import { addInvestigationToDataAdded, fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById, modifyInvestigationRegisterConfirmation, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
+import { InvestigationRegistrationResponseType } from "../types/investigationRegistration";
 
 export async function addInvestigationRegistration(invReg: any) {
     const addingInvReg = await validateInvestigationRegister(invReg);
@@ -8,7 +9,30 @@ export async function addInvestigationRegistration(invReg: any) {
 }
 
 export async function getAllInvestigationRegistrations(limit: number, offset: number, filterUnconfirmed: boolean) {
-    return await fetchAllInvestigationRegistrations(limit, offset, filterUnconfirmed);
+    const results = await fetchAllInvestigationRegistrations(limit, offset, filterUnconfirmed);
+
+    let invRegs: InvestigationRegistrationResponseType[] = [];
+    for (const result of results.content) {
+        invRegs.push({
+            id: result.id,
+            date: result.date,
+            patient: {
+                name: result.patient_name,
+                gender: result.gender,
+                date_of_birth: result.date_of_birth,
+                contact_number: result.contact_number
+            },
+            doctor: {
+                name: result.doctor_name
+            },
+            investigations: result.investigations,
+            data_added_investigations: result.data_added_investigations,
+            cost: result.cost,
+            is_confirmed: result.is_confirmed
+        });
+    }
+
+    return { content: invRegs, totalPages: results.totalPages, totalCount: results.totalCount };
 }
 
 export async function getInvestigationRegistrationById(invRegId: number) {

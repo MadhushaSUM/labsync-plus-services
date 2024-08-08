@@ -141,15 +141,17 @@ export async function fetchAllInvestigationRegistrations(limit: number, offset: 
     try {
         await client.query('BEGIN');
 
-        let query = `SELECT id, date, patient_id, doctor_id, cost, is_confirmed, branch_id
-                     FROM public."Investigation Registration"`;
+        let query = `SELECT reg.id, reg.date, reg.cost, reg.is_confirmed, reg.branch_id, patient.name AS patient_name, patient.gender, patient.date_of_birth, patient.contact_number, doc.name AS doctor_name
+                    FROM public."Investigation Registration" reg
+                    JOIN public."Patient" patient on reg.patient_id = patient.id
+                    JOIN public."Doctor" doc on reg.doctor_id = doc.id`;
         const queryParams: any[] = [];
 
         if (filterUnconfirmed) {
-            query += ' WHERE is_confirmed = false';
+            query += ' WHERE reg.is_confirmed = false';
         }
 
-        query += ' ORDER BY date DESC';
+        query += ' ORDER BY reg.date DESC';
         query += ' LIMIT $1 OFFSET $2';
 
         queryParams.push(limit, offset);
@@ -160,13 +162,25 @@ export async function fetchAllInvestigationRegistrations(limit: number, offset: 
 
         const registrationIds = registrations.map(reg => reg.id);
 
+        // Get the total count of rows for pagination
+        const countQuery = 'SELECT COUNT(*) FROM public."Patient"';
+        const { rows: countRows } = await pool.query(countQuery);
+        const totalCount = parseInt(countRows[0].count, 10);
+
+        // Total pages
+        const totalPages = Math.ceil(totalCount / limit);
+
         if (registrationIds.length === 0) {
             await client.query('COMMIT');
-            return registrations.map(reg => ({
-                ...reg,
-                investigations: [],
-                data_added_investigations: []
-            }));
+            return {
+                content: registrations.map(reg => ({
+                    ...reg,
+                    investigations: [],
+                    data_added_investigations: []
+                })),
+                totalPages: totalPages,
+                totalCount: totalCount
+            };
         }
 
         // Fetch registered investigations
@@ -189,21 +203,25 @@ export async function fetchAllInvestigationRegistrations(limit: number, offset: 
         await client.query('COMMIT');
 
         // Map the results into the desired format
-        return registrations.map(reg => {
-            const registeredInvestigations = registeredInvestigationsResult.rows
-                .filter(row => row.registration_id === reg.id)
-                .map(row => row.investigation_id);
+        return {
+            content: registrations.map(reg => {
+                const registeredInvestigations = registeredInvestigationsResult.rows
+                    .filter(row => row.registration_id === reg.id)
+                    .map(row => row.investigation_id);
 
-            const dataAddedInvestigations = dataAddedInvestigationsResult.rows
-                .filter(row => row.registration_id === reg.id)
-                .map(row => row.investigation_id);
+                const dataAddedInvestigations = dataAddedInvestigationsResult.rows
+                    .filter(row => row.registration_id === reg.id)
+                    .map(row => row.investigation_id);
 
-            return {
-                ...reg,
-                investigations: registeredInvestigations,
-                data_added_investigations: dataAddedInvestigations
-            };
-        });
+                return {
+                    ...reg,
+                    investigations: registeredInvestigations,
+                    data_added_investigations: dataAddedInvestigations
+                };
+            }),
+            totalPages: totalPages,
+            totalCount: totalCount
+        };
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
