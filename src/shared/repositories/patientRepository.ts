@@ -23,6 +23,16 @@ export async function fetchPatientById(patientId: number) {
     return rows[0];
 }
 
+export async function fetchPatientByName(queryString: string) {
+    const query = `
+        SELECT * FROM public."Patient"
+        WHERE name ILIKE '%' || $1 || '%';
+    `;
+
+    const { rows } = await pool.query(query, [queryString]);
+    return rows;
+}
+
 export async function fetchAllPatients(limit: number, offset: number) {
     // Define the SQL query with LIMIT and OFFSET
     const query = `

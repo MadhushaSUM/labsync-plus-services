@@ -1,5 +1,5 @@
 import { validatePatient } from "../models/patient";
-import { fetchAllPatients, fetchPatientById, modifyPatient, savePatient } from "../repositories/patientRepository";
+import { fetchAllPatients, fetchPatientById, fetchPatientByName, modifyPatient, savePatient } from "../repositories/patientRepository";
 
 export async function addPatient(patient: any) {
     const addingPatient = validatePatient(patient);
@@ -12,6 +12,13 @@ export async function getPatientById(patientId: number) {
         throw new Error("Patient id must be defined");
     }
     return await fetchPatientById(patientId);
+}
+
+export async function searchPatientByName(query: string) {
+    if (query == undefined) {
+        return;
+    }
+    return await fetchPatientByName(query);
 }
 
 export async function getAllPatients(limit: number, offset: number) {

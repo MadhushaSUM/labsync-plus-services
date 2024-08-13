@@ -40,6 +40,14 @@ module "lambda_functions" {
       timeout     = 5
     },
     {
+      name        = "search-patient-by-name"     
+      handler     = "index.handler"  
+      filename    = "patient/search-patient-by-name/search-patient-by-name.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 5
+    },
+    {
       name        = "create-doctor"
       handler     = "index.handler"
       filename    = "doctor/create-doctor/create-doctor.zip"
