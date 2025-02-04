@@ -20,7 +20,8 @@ export async function getAllInvestigationRegistrations(limit: number, offset: nu
                 name: result.patient_name,
                 gender: result.gender,
                 date_of_birth: result.date_of_birth,
-                contact_number: result.contact_number
+                whatsapp_number: result.whatsapp_number,
+                version: result.version,            
             },
             doctor: {
                 name: result.doctor_name

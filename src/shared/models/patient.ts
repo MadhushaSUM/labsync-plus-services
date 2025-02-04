@@ -6,7 +6,7 @@ export function validatePatient(patient: any) {
         !patient.name ||
         !patient.gender ||
         !patient.date_of_birth ||
-        !patient.contact_number
+        !patient.version
     ) {
         throw new Error('Invalid patient data');
     }
@@ -16,7 +16,8 @@ export function validatePatient(patient: any) {
         name: patient.name,
         gender: patient.gender,
         date_of_birth: patient.date_of_birth,
-        contact_number: patient.contact_number,
+        whatsapp_number: patient.whatsapp_number,
+        version: patient.version,
     }
 
     return verifiedPatient;

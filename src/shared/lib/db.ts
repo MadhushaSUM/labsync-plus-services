@@ -1,7 +1,6 @@
 import { Pool } from 'pg';
 import { db_credentials } from './db_credentials';
 
-
 const pool = new Pool({
     user: db_credentials.user,
     host: db_credentials.host,

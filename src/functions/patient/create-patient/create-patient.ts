@@ -1,4 +1,3 @@
-import { CROSS_ORIGIN } from "../../../shared/config/CORS";
 import { addPatient } from "../../../shared/services/patientService"
 
 export const handler = async (event: any) => {
@@ -9,9 +8,9 @@ export const handler = async (event: any) => {
         return {
             statusCode: 200,
             headers: {
-                'Access-Control-Allow-Origin': CROSS_ORIGIN,
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT',
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
             body: JSON.stringify({ message: 'Patient added successfully', content: result })
         };
@@ -19,11 +18,11 @@ export const handler = async (event: any) => {
         return {
             statusCode: 500,
             headers: {
-                'Access-Control-Allow-Origin': CROSS_ORIGIN,
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT',
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
-            body: JSON.stringify({ message: 'Internal Server Error', error: error.message })
+            body: JSON.stringify({ message: error.message || error.toString() }),
         };
     }
 };

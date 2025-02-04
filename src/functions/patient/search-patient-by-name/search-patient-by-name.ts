@@ -1,8 +1,10 @@
-import { getPatientById } from "../../../shared/services/patientService";
+import { searchPatientByName } from "../../../shared/services/patientService";
 
 export const handler = async (event: any) => {
+
     try {
-        const result = await getPatientById(event.queryStringParameters.patientId);
+        const result = await searchPatientByName(event.queryStringParameters.query);
+
         if (result) {
             return {
                 statusCode: 200,
@@ -21,7 +23,7 @@ export const handler = async (event: any) => {
                     "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
                     "Access-Control-Allow-Headers": "Content-Type,Authorization"
                 },
-                body: JSON.stringify({ message: `No patient found for id: ${event.queryStringParameters.patientId}` })
+                body: JSON.stringify({ message: `No patient found for query: ${event.queryStringParameters.query}` })
             };
         }
     } catch (error: any) {
@@ -32,7 +34,7 @@ export const handler = async (event: any) => {
                 "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
                 "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
-            body: JSON.stringify({ message: error.message || error.toString() })
+            body: JSON.stringify({ message: error.message || error.toString() }),
         };
     }
 };

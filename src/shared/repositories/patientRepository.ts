@@ -3,11 +3,11 @@ import pool from '../lib/db';
 
 export async function savePatient(patient: PatientType) {
     const query = `
-        INSERT INTO public."Patient" (name, gender, date_of_birth, contact_number)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO public.patients(name, date_of_birth, gender, whatsapp_number, version)
+        VALUES ($1, $2, $3, $4, 1)
         RETURNING *;
     `;
-    const values = [patient.name, patient.gender, patient.date_of_birth, patient.contact_number];
+    const values = [patient.name, patient.date_of_birth, patient.gender, patient.whatsapp_number ? patient.whatsapp_number : null];
 
     const result = await pool.query(query, values);
     return result.rows[0];
@@ -15,7 +15,7 @@ export async function savePatient(patient: PatientType) {
 
 export async function fetchPatientById(patientId: number) {
     const query = `
-        SELECT * FROM public."Patient"
+        SELECT * FROM public.patients
         WHERE id = $1;
     `;
 
@@ -25,7 +25,7 @@ export async function fetchPatientById(patientId: number) {
 
 export async function fetchPatientByName(queryString: string) {
     const query = `
-        SELECT * FROM public."Patient"
+        SELECT * FROM public.patients
         WHERE name ILIKE '%' || $1 || '%';
     `;
 
@@ -33,26 +33,17 @@ export async function fetchPatientByName(queryString: string) {
     return rows;
 }
 
-export async function fetchAllPatients(limit: number, offset: number) {
-    // Define the SQL query with LIMIT and OFFSET
-    const query = `
-        SELECT * FROM public."Patient"
-        ORDER BY id
-        LIMIT $1 OFFSET $2;
-    `;
+export async function fetchAllPatients(limit: number, offset: number, search: string = '') {
+    const searchQuery = `%${search.trim().toLowerCase()}%`;
 
-    // Execute the query
-    const { rows: patients } = await pool.query(query, [limit, offset]);
+    const query = `SELECT * FROM public.patients WHERE LOWER(TRIM(name)) LIKE $1 ORDER BY id LIMIT $2 OFFSET $3`;
 
-    // Get the total count of rows for pagination
-    const countQuery = 'SELECT COUNT(*) FROM public."Patient"';
-    const { rows: countRows } = await pool.query(countQuery);
+    const { rows: patients } = await pool.query(query, [searchQuery, limit, offset]);
+
+    const countQuery = 'SELECT COUNT(*) FROM public.patients WHERE LOWER(TRIM(name)) LIKE $1';
+    const { rows: countRows } = await pool.query(countQuery, [searchQuery]);
     const totalCount = parseInt(countRows[0].count, 10);
 
-    // // Calculate the next offset for pagination
-    // const nextOffset = offset + limit < totalCount ? offset + limit : null;
-
-    // Total pages
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
@@ -62,11 +53,12 @@ export async function fetchAllPatients(limit: number, offset: number) {
     };
 }
 
+
 export async function modifyPatient(id: number, patientDetails: PatientType) {
     const query = `
-        UPDATE public."Patient"
-        SET name = $1, gender = $2, date_of_birth = $3, contact_number = $4
-        WHERE id = $5
+        UPDATE public.patients
+        SET name = $1, gender = $2, date_of_birth = $3, whatsapp_number = $4, version = $5
+        WHERE id = $6
         RETURNING *;
     `;
 
@@ -74,7 +66,8 @@ export async function modifyPatient(id: number, patientDetails: PatientType) {
         patientDetails.name,
         patientDetails.gender,
         patientDetails.date_of_birth,
-        patientDetails.contact_number,
+        patientDetails.whatsapp_number,
+        patientDetails.version + 1,
         id
     ]);
 

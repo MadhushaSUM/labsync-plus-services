@@ -21,13 +21,19 @@ export async function searchPatientByName(query: string) {
     return await fetchPatientByName(query);
 }
 
-export async function getAllPatients(limit: number, offset: number) {
-    return await fetchAllPatients(limit, offset);
+export async function getAllPatients(limit: number, offset: number, search?: string) {
+    return await fetchAllPatients(limit, offset, search);
 }
 
 export async function updatePatient(id: number, patientDetails: any) {
     const updatingPatient = validatePatient(patientDetails);
 
-    return await modifyPatient(id, updatingPatient);
+    const oldPatient = await fetchPatientById(id);
+
+    if (oldPatient.version != updatingPatient.version) {
+        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+    } else {
+        return await modifyPatient(id, updatingPatient);
+    }
 }
 

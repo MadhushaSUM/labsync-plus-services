@@ -3,5 +3,6 @@ export interface PatientType {
     name: string,
     gender: string;
     date_of_birth: string;
-    contact_number: string;
+    whatsapp_number: string;
+    version: number;
 }
