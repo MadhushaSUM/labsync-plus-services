@@ -13,7 +13,7 @@ module "lambda_functions" {
       filename    = "patient/create-patient/create-patient.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "update-patient"     
@@ -21,7 +21,7 @@ module "lambda_functions" {
       filename    = "patient/update-patient/update-patient.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-all-patients"     
@@ -29,7 +29,7 @@ module "lambda_functions" {
       filename    = "patient/get-all-patients/get-all-patients.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-patient-by-id"     
@@ -37,7 +37,7 @@ module "lambda_functions" {
       filename    = "patient/get-patient-by-id/get-patient-by-id.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "search-patient-by-name"     
@@ -45,7 +45,7 @@ module "lambda_functions" {
       filename    = "patient/search-patient-by-name/search-patient-by-name.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "create-doctor"
@@ -53,7 +53,7 @@ module "lambda_functions" {
       filename    = "doctor/create-doctor/create-doctor.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "update-doctor"     
@@ -61,7 +61,7 @@ module "lambda_functions" {
       filename    = "doctor/update-doctor/update-doctor.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-all-doctors"     
@@ -69,7 +69,7 @@ module "lambda_functions" {
       filename    = "doctor/get-all-doctors/get-all-doctors.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-doctor-by-id"     
@@ -77,7 +77,7 @@ module "lambda_functions" {
       filename    = "doctor/get-doctor-by-id/get-doctor-by-id.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-investigation-by-id"     
@@ -85,7 +85,7 @@ module "lambda_functions" {
       filename    = "investigation/get-investigation-by-id/get-investigation-by-id.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "add-investigation-registration"     
@@ -93,7 +93,7 @@ module "lambda_functions" {
       filename    = "investigation-register/add-investigation-registration/add-investigation-registration.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "update-investigation-registration"     
@@ -101,7 +101,7 @@ module "lambda_functions" {
       filename    = "investigation-register/update-investigation-registration/update-investigation-registration.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-all-investigation-registrations"     
@@ -109,7 +109,7 @@ module "lambda_functions" {
       filename    = "investigation-register/get-all-investigation-registrations/get-all-investigation-registrations.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "confirm-investigation-registration"     
@@ -117,7 +117,7 @@ module "lambda_functions" {
       filename    = "investigation-register/confirm-investigation-registration/confirm-investigation-registration.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "add-investigation-data"     
@@ -125,7 +125,7 @@ module "lambda_functions" {
       filename    = "investigation-data/add-investigation-data/add-investigation-data.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "get-investigation-data"     
@@ -133,7 +133,7 @@ module "lambda_functions" {
       filename    = "investigation-data/get-investigation-data/get-investigation-data.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
+      timeout     = 120
     },
     {
       name        = "update-investigation-data"     
@@ -141,8 +141,16 @@ module "lambda_functions" {
       filename    = "investigation-data/update-investigation-data/update-investigation-data.zip"
       runtime     = "nodejs20.x"
       memory_size = 128
-      timeout     = 5
-    }
+      timeout     = 120
+    },
+    {
+      name        = "get-all-audit-trail-records"
+      handler     = "index.handler"
+      filename    = "audit-trail/get-all-audit-trail-records/get-all-audit-trail-records.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 
