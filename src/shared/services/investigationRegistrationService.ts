@@ -21,10 +21,11 @@ export async function getAllInvestigationRegistrations(limit: number, offset: nu
                 gender: result.gender,
                 date_of_birth: result.date_of_birth,
                 whatsapp_number: result.whatsapp_number,
-                version: result.version,            
+                version: result.patient_version,            
             },
             doctor: {
-                name: result.doctor_name
+                name: result.doctor_name,
+                version: result.doctor_version
             },
             investigations: result.investigations,
             data_added_investigations: result.data_added_investigations,

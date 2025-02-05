@@ -1,17 +1,16 @@
-import { CROSS_ORIGIN } from "../../../shared/config/CORS";
 import { getAllDoctors } from "../../../shared/services/doctorService";
 
 export const handler = async (event: any) => {
-    const { limit, offset } = event.queryStringParameters;
+    const { limit, offset, search } = event.queryStringParameters;
 
     try {
-        const result = await getAllDoctors(limit, offset);
+        const result = await getAllDoctors(limit, offset, search);
         return {
             statusCode: 200,
             headers: {
-                'Access-Control-Allow-Origin': CROSS_ORIGIN,
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT',
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
             body: JSON.stringify({ content: result.doctors, totalPages: result.totalPages, totalElements: result.totalCount })
         };
@@ -19,11 +18,11 @@ export const handler = async (event: any) => {
         return {
             statusCode: 500,
             headers: {
-                'Access-Control-Allow-Origin': CROSS_ORIGIN,
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT',
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
-            body: JSON.stringify({ message: 'Internal Server Error', error: error.message })
+            body: JSON.stringify({ message: error.message || error.toString() })
         };
     }
 };

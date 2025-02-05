@@ -3,8 +3,8 @@ import pool from '../lib/db';
 
 export async function saveDoctor(doctor: DoctorType) {
     const query = `
-        INSERT INTO public."Doctor" (name)
-        VALUES ($1)
+        INSERT INTO public.doctors (name, version)
+        VALUES ($1, 1)
         RETURNING *;
     `;
     const values = [doctor.name];
@@ -14,32 +14,23 @@ export async function saveDoctor(doctor: DoctorType) {
 }
 
 export async function fetchDoctorById(doctorId: number) {
-    const query = `
-        SELECT * FROM  public."Doctor"
-        WHERE id = $1;
-    `;
+    const query = `SELECT * FROM  public.doctors WHERE id = $1;`;
 
     const { rows } = await pool.query(query, [doctorId]);
     return rows[0];
 }
 
-export async function fetchAllDoctors(limit: number, offset: number) {
-    const query = `
-        SELECT * FROM public."Doctor"
-        ORDER BY id
-        LIMIT $1 OFFSET $2;
-    `;
+export async function fetchAllDoctors(limit: number, offset: number, search: string = '') {
+    const searchQuery = `%${search.trim().toLowerCase()}%`;
 
-    const { rows: doctors } = await pool.query(query, [limit, offset]);
+    const query = `SELECT * FROM public.doctors WHERE LOWER(TRIM(name)) LIKE $1 ORDER BY id LIMIT $2 OFFSET $3`;
 
-    const countQuery = 'SELECT COUNT(*) FROM public."Doctor"';
-    const { rows: countRows } = await pool.query(countQuery);
+    const { rows: doctors } = await pool.query(query, [searchQuery, limit, offset]);
+
+    const countQuery = 'SELECT COUNT(*) FROM public.doctors WHERE LOWER(TRIM(name)) LIKE $1';
+    const { rows: countRows } = await pool.query(countQuery, [searchQuery]);
     const totalCount = parseInt(countRows[0].count, 10);
 
-    // // Calculate the next offset for pagination
-    // const nextOffset = offset + limit < totalCount ? offset + limit : null;
-
-    // Total pages
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
@@ -51,14 +42,15 @@ export async function fetchAllDoctors(limit: number, offset: number) {
 
 export async function modifyDoctor(id: number, doctorDetails: DoctorType) {
     const query = `
-        UPDATE public."Doctor"
-        SET name = $1
-        WHERE id = $2
+        UPDATE public.doctors
+        SET name = $1, version = $2
+        WHERE id = $3
         RETURNING *;
     `;
 
     const { rows } = await pool.query(query, [
         doctorDetails.name,
+        doctorDetails.version + 1,
         id
     ]);
 

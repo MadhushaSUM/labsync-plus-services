@@ -14,13 +14,19 @@ export async function getDoctorById(DoctorId: number) {
     return await fetchDoctorById(DoctorId);
 }
 
-export async function getAllDoctors(limit: number, offset: number) {
-    return await fetchAllDoctors(limit, offset);
+export async function getAllDoctors(limit: number, offset: number, search?: string) {
+    return await fetchAllDoctors(limit, offset, search);
 }
 
 export async function updateDoctor(id: number, DoctorDetails: any) {
     const updatingDoctor = validateDoctor(DoctorDetails);
 
-    return await modifyDoctor(id, updatingDoctor);
+    const oldDoctor = await fetchDoctorById(id);
+
+    if (oldDoctor.version != updatingDoctor.version) {
+        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+    } else {
+        return await modifyDoctor(id, updatingDoctor);
+    }
 }
 
