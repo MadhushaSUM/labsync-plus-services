@@ -15,7 +15,6 @@ module.exports = {
     'investigation-register/add-investigation-registration': './src/functions/investigation-register/add-investigation-registration/add-investigation-registration.ts',
     'investigation-register/update-investigation-registration': './src/functions/investigation-register/update-investigation-registration/update-investigation-registration.ts',
     'investigation-register/get-all-investigation-registrations': './src/functions/investigation-register/get-all-investigation-registrations/get-all-investigation-registrations.ts',
-    'investigation-register/confirm-investigation-registration': './src/functions/investigation-register/confirm-investigation-registration/confirm-investigation-registration.ts',
     'investigation-data/add-investigation-data': './src/functions/investigation-data/add-investigation-data/add-investigation-data.ts',
     'investigation-data/get-investigation-data': './src/functions/investigation-data/get-investigation-data/get-investigation-data.ts',
     'investigation-data/update-investigation-data': './src/functions/investigation-data/update-investigation-data/update-investigation-data.ts',

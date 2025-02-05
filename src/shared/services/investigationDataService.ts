@@ -1,7 +1,6 @@
 import { validateInvestigationDataRequestBody } from "../models/investigationData";
 import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData } from "../repositories/investigationDataRepository";
 import { InvestigationData } from "../types/investigationData";
-import { addInvestigationToDataAddedList } from "./investigationRegistrationService";
 
 export async function addInvestigationData(investigationRegistrationId: number, investigationId: number, body: any) {
     const validatedDataBody = await validateInvestigationDataRequestBody(investigationId, body);

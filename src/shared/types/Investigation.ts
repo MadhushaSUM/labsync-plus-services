@@ -1,6 +1,7 @@
-export interface InvestigationType {
+export interface Test {
     id: number;
     name: string;
     code: string;
-    specimen: string;
+    price: number;
+    version: number;
 }

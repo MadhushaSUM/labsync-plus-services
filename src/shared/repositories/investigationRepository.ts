@@ -1,5 +1,4 @@
 import pool from '../lib/db';
-import { InvestigationType } from '../types/Investigation';
 
 export async function fetchInvestigationById(investigationId: number) {
     const query = `
@@ -26,5 +25,5 @@ export async function fetchInvestigationsByIds(ids: number[]) {
     // Execute the query
     const { rows } = await pool.query(query, [uniqueIds]);
 
-    return rows as InvestigationType[];
+    return rows as { id: number; name: string; code: string; price: number }[];
 }

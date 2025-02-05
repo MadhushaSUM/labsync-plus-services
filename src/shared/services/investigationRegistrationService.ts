@@ -1,59 +1,179 @@
-import { validateInvestigationRegister } from "../models/investigationRegistration";
-import { addInvestigationToDataAdded, fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById, modifyInvestigationRegisterConfirmation, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
-import { InvestigationRegistrationResponseType } from "../types/investigationRegistration";
+import { validateInvestigationRegister, validateUpdatingInvestigationRegister } from "../models/investigationRegistration";
+import { fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById, modifyInvestigationRegistration, saveInvestigationRegistration } from "../repositories/investigationRegistrationRepository";
+import { Registration } from "../types/investigationRegistration";
+import { addAuditTrailRecord } from "./auditTrailService";
 
 export async function addInvestigationRegistration(invReg: any) {
     const addingInvReg = await validateInvestigationRegister(invReg);
 
-    return await saveInvestigationRegistration(addingInvReg);
+    //TODO: update userId 
+    addAuditTrailRecord("user001", "Add registration", addingInvReg);
+
+
+    return await saveInvestigationRegistration({
+        patientId: addingInvReg.patient_id,
+        date: addingInvReg.date,
+        branchId: addingInvReg.branch_id,
+        investigations: addingInvReg.investigations,
+        totalCost: addingInvReg.totalCost,
+        paidPrice: addingInvReg.paid,
+        doctorId: addingInvReg.doctor_id,
+        refNumber: addingInvReg.refNumber,
+    });
 }
 
-export async function getAllInvestigationRegistrations(limit: number, offset: number, filterUnconfirmed: boolean) {
-    const results = await fetchAllInvestigationRegistrations(limit, offset, filterUnconfirmed);
+export async function getAllInvestigationRegistrations(limit: number, offset: number, patientId: number, startDate?: string, endDate?: string, refNumber?: number) {
+    const rows = await fetchAllInvestigationRegistrations(offset, limit, startDate, endDate, patientId, refNumber);
 
-    let invRegs: InvestigationRegistrationResponseType[] = [];
-    for (const result of results.content) {
-        invRegs.push({
-            id: result.id,
-            date: result.date,
-            patient: {
-                name: result.patient_name,
-                gender: result.gender,
-                date_of_birth: result.date_of_birth,
-                whatsapp_number: result.whatsapp_number,
-                version: result.patient_version,            
-            },
-            doctor: {
-                name: result.doctor_name,
-                version: result.doctor_version
-            },
-            investigations: result.investigations,
-            data_added_investigations: result.data_added_investigations,
-            cost: result.cost,
-            is_confirmed: result.is_confirmed
-        });
+    if (rows.length === 0) {
+        return { totalCount: 0, totalPages: 0, registrations: [] };
     }
 
-    return { content: invRegs, totalPages: results.totalPages, totalCount: results.totalCount };
+    const totalCount = parseInt(rows[0].total_count, 10);
+
+    const registrations: Registration[] = [];
+    const registrationMap = new Map<number, Registration>();
+
+    rows.forEach(row => {
+        if (!registrationMap.has(row.registrations_id)) {
+            const registration: Registration = {
+                id: row.registrations_id,
+                date: row.date,
+                patient: {
+                    id: row.patient_id,
+                    name: row.patient_name,
+                    gender: row.patient_gender,
+                    date_of_birth: row.patient_date_of_birth,
+                    whatsapp_number: row.patient_whatsapp_number,
+                    version: row.patient_version
+                },
+                ref_number: row.ref_number,
+                total_cost: row.total_cost,
+                paid_price: row.paid_price,
+                collected: row.collected,
+                registeredTests: [],
+                version: row.registration_version,
+            };
+            registrationMap.set(row.registrations_id, registration);
+            registrations.push(registration);
+        }
+
+        const registration: Registration = registrationMap.get(row.registrations_id)!;
+        registration.registeredTests.push({
+            test: {
+                id: row.test_id,
+                name: row.test_name,
+                code: row.test_code,
+                price: row.test_price,
+                version: row.test_version,
+            },
+            doctor: row.doctor_id
+                ? {
+                    id: row.doctor_id,
+                    name: row.doctor_name,
+                    version: row.doctor_version,
+                }
+                : null,
+            data: row.data,
+            options: row.options,
+            data_added: row.data_added,
+            printed: row.printed,
+            version: row.registration_test_version,
+        });
+    });
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return { totalCount, registrations, totalPages };
 }
 
 export async function getInvestigationRegistrationById(invRegId: number) {
     if (invRegId == undefined) {
         throw new Error("Investigation registration id must be defined");
     }
-    return await fetchInvestigationRegistrationById(invRegId);
+
+    const rows = await fetchInvestigationRegistrationById(invRegId);
+
+    if (rows.length === 0) {
+        return null;
+    }
+
+    const registration: Registration = {
+        id: rows[0].registrations_id,
+        date: rows[0].date,
+        patient: {
+            id: rows[0].patient_id,
+            name: rows[0].patient_name,
+            gender: rows[0].patient_gender,
+            date_of_birth: rows[0].patient_date_of_birth,
+            whatsapp_number: rows[0].patient_whatsapp_number,
+            version: rows[0].patient_version,
+        },
+        ref_number: rows[0].ref_number,
+        total_cost: rows[0].total_cost,
+        paid_price: rows[0].paid_price,
+        collected: rows[0].collected,
+        version: rows[0].registration_version,
+        registeredTests: rows.map(row => ({
+            test: {
+                id: row.test_id,
+                name: row.test_name,
+                code: row.test_code,
+                price: row.test_price,
+                version: row.test_version
+            },
+            doctor: row.doctor_id
+                ? {
+                    id: row.doctor_id,
+                    name: row.doctor_name,
+                    version: row.doctor_version
+                }
+                : null,
+            data: row.data,
+            options: row.options,
+            data_added: row.data_added,
+            printed: row.printed,
+            version: row.registration_test_version,
+        })),
+    };
+
+    return registration;
 }
 
 export async function updateInvestigationRegistration(id: number, invReg: any) {
-    const addingInvReg = await validateInvestigationRegister(invReg, true);
+    const newInvReg = await validateUpdatingInvestigationRegister(invReg);
 
-    return await modifyInvestigationRegistration(id, addingInvReg);
-}
+    const oldInvReg = await getInvestigationRegistrationById(id);
 
-export async function markInvestigationRegistrationConfirmed(id: number) {
-    return await modifyInvestigationRegisterConfirmation(id, true);
-}
+    if (oldInvReg) {
+        if (oldInvReg.version != newInvReg.version) {
+            throw new Error("Version mismatch. Please fetch the latest version before updating!");
+        } else {
+            const previousTestIds: number[] = [];
+            if (oldInvReg) {
+                previousTestIds.concat(oldInvReg.registeredTests.map(test => test.test.id));
+            }
 
-export async function addInvestigationToDataAddedList(invRegId: number, investigationId: number) {
-    return await addInvestigationToDataAdded(invRegId, investigationId);
+            //TODO: update userId 
+            addAuditTrailRecord("user001", "Update doctor", { new: newInvReg, old: oldInvReg });
+
+            return await modifyInvestigationRegistration(id, {
+                id: newInvReg.id,
+                patientId: newInvReg.patient_id,
+                branch_id: newInvReg.branch_id,
+                doctorId: newInvReg.doctor_id,
+                refNumber: newInvReg.refNumber,
+                date: newInvReg.date,
+                testIds: newInvReg.investigations,
+                dataAddedTestIds: newInvReg.dataAddedInvestigations,
+                previousTestIds: previousTestIds,
+                totalCost: newInvReg.totalCost,
+                paidPrice: newInvReg.paid,
+                collected: newInvReg.collected,
+                version: newInvReg.version
+            });
+        }
+    } else {
+        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+    }
 }

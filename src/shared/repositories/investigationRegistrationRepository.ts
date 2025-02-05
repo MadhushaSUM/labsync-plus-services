@@ -1,271 +1,263 @@
-import { InvestigationRegistrationType } from '../types/investigationRegistration';
 import pool from '../lib/db';
+import { formatISO } from 'date-fns';
 
-export async function saveInvestigationRegistration(invReg: InvestigationRegistrationType) {
+export async function saveInvestigationRegistration(data: {
+    date: Date;
+    patientId: number;
+    branchId: number;
+    refNumber?: number | null;
+    doctorId?: number | null;
+    totalCost: number;
+    paidPrice: number;
+    investigations: number[];
+}) {
+    const { patientId, doctorId, refNumber, date, investigations, totalCost, paidPrice, branchId } = data;
+    const dateOfTest = formatISO(date, { representation: "date" });
+
     const client = await pool.connect();
+
     try {
         await client.query('BEGIN');
 
-        // Insert into Investigation Registration
-        const result = await client.query(
-            `INSERT INTO public."Investigation Registration" (date, patient_id, doctor_id, cost, is_confirmed)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id`,
-            [invReg.date, invReg.patient_id, invReg.doctor_id, invReg.cost, invReg.is_confirmed]
+        const testRegisterResult = await client.query(
+            `
+            INSERT INTO registrations (date, patient_id, branch_id, ref_number, total_cost, paid, collected, version)
+            VALUES ($1, $2, $3, $4, $5, $6, false, 1)
+            RETURNING id;
+            `,
+            [dateOfTest, patientId, branchId, refNumber || null, totalCost, paidPrice]
         );
+        const testRegisterId = testRegisterResult.rows[0].id;
 
-        const registrationId = result.rows[0].id;
+        const testRegisterTestsValues = investigations.map(
+            (testId) => `(${testRegisterId}, ${testId}, ${doctorId || 'NULL'})`
+        ).join(',');
 
-        // Insert into Registered Investigations
-        const registeredInvestigations = invReg.investigations.map(id => `(${registrationId}, ${id})`).join(', ');
-        const registeredInvestigationsQuery = `INSERT INTO public."Registered Investigations" (registration_id, investigation_id) VALUES ${registeredInvestigations}`;
-        await client.query(registeredInvestigationsQuery);
-
-        await client.query('COMMIT');
-
-        return {
-            ...invReg,
-            id: registrationId
-        };
-    } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-    } finally {
-        client.release();
-    }
-}
-
-export async function fetchInvestigationRegistrationById(id: number): Promise<InvestigationRegistrationType | null> {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-
-        const regResult = await client.query(
-            `SELECT id, date, patient_id, doctor_id, cost, is_confirmed, branch_id
-            FROM public."Investigation Registration"
-            WHERE id = $1`,
-            [id]
-        );
-
-        if (regResult.rows.length === 0) {
-            await client.query('ROLLBACK');
-            return null; // Return null if no record found
-        }
-
-        const registration = regResult.rows[0];
-
-        const registeredInvestigationsResult = await client.query(
-            `SELECT investigation_id
-            FROM public."Registered Investigations"
-            WHERE registration_id = $1`,
-            [id]
-        );
-        const investigations = registeredInvestigationsResult.rows.map(row => row.investigation_id);
-
-        const dataAddedInvestigationsResult = await client.query(
-            `SELECT investigation_id
-            FROM public."Data Added Investigations"
-            WHERE registration_id = $1`,
-            [id]
-        );
-        const dataAddedInvestigations = dataAddedInvestigationsResult.rows.map(row => row.investigation_id);
-
-        await client.query('COMMIT');
-
-        return {
-            ...registration,
-            investigations,
-            data_added_investigations: dataAddedInvestigations
-        };
-    } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-    } finally {
-        client.release();
-    }
-}
-
-export async function modifyInvestigationRegistration(id: number, invReg: InvestigationRegistrationType) {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-
-        // Update the Investigation Registration record
         await client.query(
-            `UPDATE public."Investigation Registration"
-            SET date = $1, patient_id = $2, doctor_id = $3, cost = $4, is_confirmed = $5
-            WHERE id = $6`,
-            [invReg.date, invReg.patient_id, invReg.doctor_id, invReg.cost, invReg.is_confirmed, id]
+            `
+            INSERT INTO registrations_tests (registrations_id, test_id, doctor_id)
+            VALUES ${testRegisterTestsValues};
+            `
         );
-
-        // Remove old registered investigations
-        await client.query(
-            `DELETE FROM public."Registered Investigations"
-            WHERE registration_id = $1`,
-            [id]
-        );
-
-        // Insert new registered investigations
-        const registeredInvestigations = invReg.investigations.map(id => [id, id]); // [(registrationId, investigationId)]
-        if (registeredInvestigations.length > 0) {
-            const registeredInvestigationsQuery = `INSERT INTO public."Registered Investigations" (registration_id, investigation_id) VALUES ${registeredInvestigations.map((_, i) => `($1, $${i + 2})`).join(', ')}`;
-            await client.query(registeredInvestigationsQuery, [id, ...invReg.investigations]);
-        }
-
-        // Remove old data added investigations
-        await client.query(
-            `DELETE FROM public."Data Added Investigations"
-            WHERE registration_id = $1`,
-            [id]
-        );
-
-        // Insert new data added investigations
-        const dataAddedInvestigations = invReg.data_added_investigations.map(id => [id, id]); // [(registrationId, investigationId)]
-        if (dataAddedInvestigations.length > 0) {
-            const dataAddedInvestigationsQuery = `INSERT INTO public."Data Added Investigations" (registration_id, investigation_id) VALUES ${dataAddedInvestigations.map((_, i) => `($1, $${i + 2})`).join(', ')}`;
-            await client.query(dataAddedInvestigationsQuery, [id, ...invReg.data_added_investigations]);
-        }
 
         await client.query('COMMIT');
 
-    } catch (error) {
+        return testRegisterId;
+    } catch (error: any) {
         await client.query('ROLLBACK');
-        throw error;
+        throw new Error(`Transaction failed: ${error.message}`);
     } finally {
         client.release();
     }
 }
 
-export async function fetchAllInvestigationRegistrations(limit: number, offset: number, filterUnconfirmed: boolean = false) {
+export async function fetchInvestigationRegistrationById(id: number) {
+    try {
+        const query = `
+        SELECT 
+            tr.id AS registrations_id,
+            tr.date,
+            tr.ref_number,
+            tr.total_cost,
+            tr.paid AS paid_price,
+            tr.collected,
+            tr.version AS registration_version,
+            p.id AS patient_id,
+            p.name AS patient_name,
+            p.gender AS patient_gender,
+            p.date_of_birth AS patient_date_of_birth,
+            p.whatsapp_number AS patient_whatsapp_number,
+            p.version AS patient_version,
+            t.id AS test_id,
+            t.name AS test_name,
+            t.code AS test_code,
+            t.price AS test_price,
+            t.version AS test_version,
+            d.id AS doctor_id,
+            d.name AS doctor_name,
+            d.version AS doctor_version,
+            trt.data,
+            trt.options,
+            trt.data_added,
+            trt.printed,
+            trt.version AS registration_test_version
+        FROM registrations AS tr
+        INNER JOIN patients AS p ON tr.patient_id = p.id
+        INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
+        INNER JOIN tests AS t ON trt.test_id = t.id
+        LEFT JOIN doctors AS d ON trt.doctor_id = d.id
+        WHERE tr.id = $1;
+    `;
+        const { rows } = await pool.query(query, [id]);
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function modifyInvestigationRegistration(registrationId: number, data: {
+    id: number;
+    patientId: number;
+    branch_id: number;
+    doctorId: number | null;
+    refNumber: number | null;
+    date: Date;
+    testIds: number[];
+    dataAddedTestIds: number[];
+    previousTestIds: number[];
+    totalCost: number;
+    paidPrice: number;
+    collected: boolean;
+    version: number;
+}) {
+    const { patientId, branch_id, doctorId, refNumber, date, testIds, dataAddedTestIds, previousTestIds, totalCost, paidPrice, collected, version } = data;
+    const dateOfTest = formatISO(date, { representation: "date" });
+
     const client = await pool.connect();
+
     try {
         await client.query('BEGIN');
 
-        let query = `SELECT reg.id, reg.date, reg.cost, reg.is_confirmed, reg.branch_id, patient.name AS patient_name, patient.gender, patient.date_of_birth, patient.contact_number, doc.name AS doctor_name
-                    FROM public."Investigation Registration" reg
-                    JOIN public."Patient" patient on reg.patient_id = patient.id
-                    JOIN public."Doctor" doc on reg.doctor_id = doc.id`;
-        const queryParams: any[] = [];
-
-        if (filterUnconfirmed) {
-            query += ' WHERE reg.is_confirmed = false';
-        }
-
-        query += ' ORDER BY reg.date DESC';
-        query += ' LIMIT $1 OFFSET $2';
-
-        queryParams.push(limit, offset);
-
-        const result = await client.query(query, queryParams);
-
-        const registrations = result.rows;
-
-        const registrationIds = registrations.map(reg => reg.id);
-
-        // Get the total count of rows for pagination
-        const countQuery = 'SELECT COUNT(*) FROM public."Patient"';
-        const { rows: countRows } = await pool.query(countQuery);
-        const totalCount = parseInt(countRows[0].count, 10);
-
-        // Total pages
-        const totalPages = Math.ceil(totalCount / limit);
-
-        if (registrationIds.length === 0) {
-            await client.query('COMMIT');
-            return {
-                content: registrations.map(reg => ({
-                    ...reg,
-                    investigations: [],
-                    data_added_investigations: []
-                })),
-                totalPages: totalPages,
-                totalCount: totalCount
-            };
-        }
-
-        // Fetch registered investigations
-        const registeredInvestigationsResult = await client.query(
-            `SELECT registration_id, investigation_id
-            FROM public."Registered Investigations"
-            WHERE registration_id = ANY($1::int[])`,
-            [registrationIds]
+        // Update test register details
+        await client.query(
+            `
+            UPDATE registrations
+            SET patient_id = $1, ref_number = $2, date = $3, total_cost = $4, paid = $5, branch_id = $6, collected = $7, version = $8
+            WHERE id = $9;
+            `,
+            [patientId, refNumber || null, dateOfTest, totalCost, paidPrice, branch_id, collected, version + 1, registrationId]
         );
 
-        // Fetch data added investigations
-        const dataAddedInvestigationsResult = await client.query(
-            `SELECT registration_id, investigation_id
-            FROM public."Data Added Investigations"
-            WHERE registration_id = ANY($1::int[])`,
-            [registrationIds]
+        const dataEmptyTestsToRemove = previousTestIds.filter(
+            testId => !dataAddedTestIds.includes(testId)
         );
 
-        // Commit the transaction
+        if (dataEmptyTestsToRemove.length > 0) {
+            await client.query(
+                `
+                DELETE FROM registrations_tests
+                WHERE registrations_id = $1 AND test_id = ANY($2::int[]);
+                `,
+                [registrationId, dataEmptyTestsToRemove]
+            );
+        }
+
+        // Identify tests to add (new or edited tests)
+        const testsToAdd = testIds.filter(testId => !dataAddedTestIds.includes(testId));
+        const testRegisterTestsValues = testsToAdd
+            .map(testId => `(${registrationId}, ${testId}, ${doctorId || 'NULL'})`)
+            .join(',');
+
+        if (testsToAdd.length > 0) {
+            await client.query(
+                `
+                INSERT INTO registrations_tests (registrations_id, test_id, doctor_id)
+                VALUES ${testRegisterTestsValues};
+                `
+            );
+        }
+
         await client.query('COMMIT');
 
-        // Map the results into the desired format
-        return {
-            content: registrations.map(reg => {
-                const registeredInvestigations = registeredInvestigationsResult.rows
-                    .filter(row => row.registration_id === reg.id)
-                    .map(row => row.investigation_id);
-
-                const dataAddedInvestigations = dataAddedInvestigationsResult.rows
-                    .filter(row => row.registration_id === reg.id)
-                    .map(row => row.investigation_id);
-
-                return {
-                    ...reg,
-                    investigations: registeredInvestigations,
-                    data_added_investigations: dataAddedInvestigations
-                };
-            }),
-            totalPages: totalPages,
-            totalCount: totalCount
-        };
-    } catch (error) {
+        return { success: true };
+    } catch (error: any) {
         await client.query('ROLLBACK');
-        throw error;
+        throw new Error(`Transaction failed: ${error.message}`);
     } finally {
         client.release();
     }
 }
 
-export async function modifyInvestigationRegisterConfirmation(invRegId: number, confirmed: boolean) {
-    const client = await pool.connect();
+export async function fetchAllInvestigationRegistrations(
+    offset: number,
+    limit: number,
+    fromDate?: string,
+    toDate?: string,
+    patientId?: number,
+    refNumber?: number
+) {
     try {
-        await client.query('BEGIN');
+        let baseQuery = `
+        SELECT 
+            tr.id AS registrations_id,
+            tr.date,
+            tr.ref_number,
+            tr.total_cost,
+            tr.paid AS paid_price,
+            tr.collected,
+            tr.version AS registration_version,
+            p.id AS patient_id,
+            p.name AS patient_name,
+            p.gender AS patient_gender,
+            p.date_of_birth AS patient_date_of_birth,
+            p.whatsapp_number AS patient_whatsapp_number,
+            p.version AS patient_version,
+            t.id AS test_id,
+            t.name AS test_name,
+            t.code AS test_code,
+            t.price AS test_price,
+            t.version AS test_version,
+            d.id AS doctor_id,
+            d.name AS doctor_name,
+            d.version AS doctor_version,
+            trt.data,
+            trt.options,
+            trt.data_added,
+            trt.printed,
+            trt.version AS registration_test_version
+        FROM registrations AS tr
+        INNER JOIN patients AS p ON tr.patient_id = p.id
+        INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
+        INNER JOIN tests AS t ON trt.test_id = t.id
+        LEFT JOIN doctors AS d ON trt.doctor_id = d.id
+    `;
 
-        const result = await client.query(
-            `UPDATE public."Investigation Registration"
-            SET is_confirmed = $1
-            WHERE id = $2`,
-            [confirmed, invRegId]
-        );
+        const conditions: string[] = [];
+        const params: any[] = [];
 
-        if (result.rowCount === 0) {
-            throw new Error('No record found with the provided ID');
+        if (fromDate) {
+            conditions.push(`tr.date >= $${params.length + 1}`);
+            params.push(fromDate);
+        }
+        if (toDate) {
+            conditions.push(`tr.date <= $${params.length + 1}`);
+            params.push(toDate);
+        }
+        if (patientId) {
+            conditions.push(`tr.patient_id = $${params.length + 1}`);
+            params.push(patientId);
+        }
+        if (refNumber) {
+            conditions.push(`tr.ref_number = $${params.length + 1}`);
+            params.push(refNumber);
         }
 
-        await client.query('COMMIT');
-    } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-    } finally {
-        client.release();
-    }
-}
+        const filteredRegisterConditions = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-export async function addInvestigationToDataAdded(invRegId: number, investigationId: number) {
-    try {
+        const query = `
+        WITH filtered_registers AS (
+            SELECT tr.id
+            FROM registrations AS tr
+            ${filteredRegisterConditions}
+            ORDER BY tr.id
+            LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+        ),
+        filtered_data AS (
+            ${baseQuery}
+        )
+        SELECT 
+            (SELECT COUNT(*) FROM registrations AS tr ${filteredRegisterConditions}) AS total_count,
+            fd.*
+        FROM filtered_data AS fd
+        WHERE fd.registrations_id IN (SELECT id FROM filtered_registers)
+        ORDER BY fd.registrations_id DESC;
+    `;
 
-        const result = await pool.query(
-            `INSERT INTO public."Data Added Investigations" (registration_id, investigation_id)
-            VALUES ($1, $2)`,
-            [invRegId, investigationId]
-        );
+        params.push(limit, offset);
 
-        return result;
+        const { rows } = await pool.query(query, params);
 
+        return rows;
     } catch (error) {
         throw error;
     }
