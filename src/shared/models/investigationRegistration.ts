@@ -4,7 +4,6 @@ export async function validateInvestigationRegister(invReg: any) {
     if (
         !invReg.date ||
         !invReg.patient_id ||
-        !invReg.doctor_id ||
         !invReg.investigations ||
         !invReg.totalCost ||
         !invReg.branch_id ||
@@ -15,10 +14,9 @@ export async function validateInvestigationRegister(invReg: any) {
 
     const verifiedInvReg:
         {
-            id?: number;
             date: Date;
             patient_id: number;
-            doctor_id: number;
+            doctor_id?: number;
             investigations: number[],
             totalCost: number;
             paid: number;
@@ -30,7 +28,7 @@ export async function validateInvestigationRegister(invReg: any) {
         patient_id: invReg.patient_id,
         doctor_id: invReg.doctor_id,
         investigations: Array.from(new Set(invReg.investigations)),
-        totalCost: invReg.cost,
+        totalCost: invReg.totalCost,
         paid: invReg.paid,
         branch_id: invReg.branch_id,
         refNumber: invReg.refNumber,
@@ -47,38 +45,22 @@ export async function validateUpdatingInvestigationRegister(invReg: any) {
         !invReg.doctor_id ||
         !invReg.date ||
         !invReg.investigations ||
-        !invReg.dataAddedInvestigations ||
         !invReg.totalCost ||
         !invReg.paid ||
-        !invReg.collected ||
+        invReg.collected == undefined ||
         !invReg.branch_id ||
         !invReg.version
     ) {
         throw new Error('Invalid investigation register data');
     }
 
-    const previousReg = await getInvestigationRegistrationById(invReg.id);
-    if (previousReg) {
-        // if updating previous data added investigations must still in investigations 
-        const dataAddedRegisteredTests = previousReg.registeredTests.filter(test => test.data_added);
-        for (const dataAddedRegisteredTest of dataAddedRegisteredTests) {
-
-            if (!invReg.investigations.find((invId: number) => invId === dataAddedRegisteredTest.test.id)) {
-                throw new Error("Can not remove previously data added investigations");
-            }
-        }
-    } else {
-        throw new Error(`No previous record under id: ${invReg.id}`);
-    }
-
     const verifiedInvReg: {
         id: number;
         patient_id: number;
-        doctor_id: number;
+        doctor_id?: number;
         refNumber: number | null;
         date: Date;
         investigations: number[],
-        dataAddedInvestigations: number[],
         totalCost: number;
         paid: number;
         collected: boolean;
@@ -90,9 +72,8 @@ export async function validateUpdatingInvestigationRegister(invReg: any) {
         doctor_id: invReg.doctor_id,
         refNumber: invReg.refNumber ? invReg.refNumber : null,
         date: new Date(invReg.date),
-        investigations: Array.from(new Set(invReg.investigations)),
-        dataAddedInvestigations: Array.from(new Set(invReg.dataAddedInvestigations)),
-        totalCost: invReg.cost,
+        investigations: invReg.investigations.map((id: string) => Number(id)),
+        totalCost: invReg.totalCost,
         paid: invReg.paid,
         collected: invReg.collected,
         branch_id: invReg.branch_id,

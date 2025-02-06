@@ -6,11 +6,9 @@ import { addAuditTrailRecord } from "./auditTrailService";
 export async function addInvestigationRegistration(invReg: any) {
     const addingInvReg = await validateInvestigationRegister(invReg);
 
-    //TODO: update userId 
-    addAuditTrailRecord("user001", "Add registration", addingInvReg);
 
 
-    return await saveInvestigationRegistration({
+    const res = await saveInvestigationRegistration({
         patientId: addingInvReg.patient_id,
         date: addingInvReg.date,
         branchId: addingInvReg.branch_id,
@@ -20,6 +18,11 @@ export async function addInvestigationRegistration(invReg: any) {
         doctorId: addingInvReg.doctor_id,
         refNumber: addingInvReg.refNumber,
     });
+
+    //TODO: update userId 
+    addAuditTrailRecord("user001", "Add registration", addingInvReg);
+
+    return res;
 }
 
 export async function getAllInvestigationRegistrations(limit: number, offset: number, patientId: number, startDate?: string, endDate?: string, refNumber?: number) {
@@ -149,31 +152,40 @@ export async function updateInvestigationRegistration(id: number, invReg: any) {
         if (oldInvReg.version != newInvReg.version) {
             throw new Error("Version mismatch. Please fetch the latest version before updating!");
         } else {
-            const previousTestIds: number[] = [];
-            if (oldInvReg) {
-                previousTestIds.concat(oldInvReg.registeredTests.map(test => test.test.id));
+            // if updating previous data added investigations must still in investigations 
+            const dataAddedRegisteredTests = oldInvReg.registeredTests.filter(test => test.data_added);
+
+            for (const dataAddedRegisteredTest of dataAddedRegisteredTests) {
+
+                if (!newInvReg.investigations.find((invId: number) => invId === Number(dataAddedRegisteredTest.test.id))) {
+                    throw new Error("Can not remove previously data added investigations");
+                }
             }
 
-            //TODO: update userId 
-            addAuditTrailRecord("user001", "Update doctor", { new: newInvReg, old: oldInvReg });
+            const previousTestIds = oldInvReg.registeredTests.map(test => Number(test.test.id));
 
-            return await modifyInvestigationRegistration(id, {
+            const res = await modifyInvestigationRegistration(id, {
                 id: newInvReg.id,
                 patientId: newInvReg.patient_id,
                 branch_id: newInvReg.branch_id,
-                doctorId: newInvReg.doctor_id,
+                doctorId: newInvReg.doctor_id || null,
                 refNumber: newInvReg.refNumber,
                 date: newInvReg.date,
                 testIds: newInvReg.investigations,
-                dataAddedTestIds: newInvReg.dataAddedInvestigations,
+                dataAddedTestIds: oldInvReg.registeredTests.filter(item => item.data_added).map(item => Number(item.test.id)),
                 previousTestIds: previousTestIds,
                 totalCost: newInvReg.totalCost,
                 paidPrice: newInvReg.paid,
                 collected: newInvReg.collected,
                 version: newInvReg.version
             });
+
+            //TODO: update userId 
+            addAuditTrailRecord("user001", "Update doctor", { new: newInvReg, old: oldInvReg });
+
+            return res;
         }
     } else {
-        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+        throw new Error(`No previous record under id: ${invReg.id}`);
     }
 }

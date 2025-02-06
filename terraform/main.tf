@@ -151,6 +151,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "get-all-investigations"
+      handler     = "index.handler"
+      filename    = "investigation/get-all-investigations/get-all-investigations.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 

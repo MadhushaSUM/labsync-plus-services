@@ -1,4 +1,4 @@
-import { fetchInvestigationById, fetchInvestigationsByIds } from "../repositories/investigationRepository";
+import { fetchAllInvestigations, fetchInvestigationById, fetchInvestigationsByIds } from "../repositories/investigationRepository";
 
 export async function getInvestigationById(investigationId: number) {
     if (investigationId == undefined) {
@@ -6,6 +6,11 @@ export async function getInvestigationById(investigationId: number) {
     }
     return await fetchInvestigationById(investigationId);
 }
+
+export async function getAllInvestigations(limit: number, offset: number, search?: string) {
+    return await fetchAllInvestigations(limit, offset, search);
+}
+
 
 export async function checkInvalidInvestigationIds(ids: number[]) {
     const result = await fetchInvestigationsByIds(ids);
