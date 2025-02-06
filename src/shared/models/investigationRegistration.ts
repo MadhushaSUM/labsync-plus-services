@@ -42,7 +42,6 @@ export async function validateUpdatingInvestigationRegister(invReg: any) {
     if (
         !invReg.id ||
         !invReg.patient_id ||
-        !invReg.doctor_id ||
         !invReg.date ||
         !invReg.investigations ||
         !invReg.totalCost ||

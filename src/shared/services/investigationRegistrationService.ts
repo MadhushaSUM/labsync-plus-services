@@ -181,7 +181,7 @@ export async function updateInvestigationRegistration(id: number, invReg: any) {
             });
 
             //TODO: update userId 
-            addAuditTrailRecord("user001", "Update doctor", { new: newInvReg, old: oldInvReg });
+            addAuditTrailRecord("user001", "Update registration", { new: newInvReg, old: oldInvReg });
 
             return res;
         }
