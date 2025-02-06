@@ -144,6 +144,14 @@ module "lambda_functions" {
       timeout     = 120
     },
     {
+      name        = "get-data-empty-investigations"     
+      handler     = "index.handler"  
+      filename    = "investigation-data/get-data-empty-investigations/get-data-empty-investigations.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
       name        = "get-all-audit-trail-records"
       handler     = "index.handler"
       filename    = "audit-trail/get-all-audit-trail-records/get-all-audit-trail-records.zip"

@@ -18,6 +18,7 @@ module.exports = {
     'investigation-data/add-investigation-data': './src/functions/investigation-data/add-investigation-data/add-investigation-data.ts',
     'investigation-data/get-investigation-data': './src/functions/investigation-data/get-investigation-data/get-investigation-data.ts',
     'investigation-data/update-investigation-data': './src/functions/investigation-data/update-investigation-data/update-investigation-data.ts',
+    'investigation-data/get-data-empty-investigations':'./src/functions/investigation-data/get-data-empty-investigations/get-data-empty-investigations.ts',
     'audit-trail/get-all-audit-trail-records': './src/functions/audit-trail/get-all-audit-trail-records/get-all-audit-trail-records.ts',
     'investigation/get-all-investigations': './src/functions/investigation/get-all-investigations/get-all-investigations.ts',
   },

@@ -37,7 +37,7 @@ export async function fetchInvestigationData(investigationRegisterId: number, in
             WHERE registration_id = $1 AND investigation_id = $2`,
             [investigationRegisterId, investigationId]
         );
-    
+
         return regResult.rows[0];
     } catch (error: any) {
         throw new Error(error.message);
@@ -59,4 +59,32 @@ export async function modifyInvestigationData(invRegId: number, investigationId:
     ]);
 
     return rows[0];
+}
+
+export async function fetchDataEmptyInvestigations() {
+    const query = `
+        SELECT 
+            tr.id AS registrations_id,
+            tr.date,
+            tr.ref_number,
+            p.id AS patient_id,
+            p.name AS patient_name,
+            p.gender AS patient_gender,
+            p.date_of_birth AS patient_date_of_birth,
+            t.id AS test_id,
+            t.name AS test_name,
+            d.id AS doctor_id,
+            d.name AS doctor_name,
+            trt.data,
+            trt.options
+        FROM registrations AS tr
+        INNER JOIN patients AS p ON tr.patient_id = p.id
+        INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
+        INNER JOIN tests AS t ON trt.test_id = t.id
+        LEFT JOIN doctors AS d ON trt.doctor_id = d.id
+        WHERE trt.data_added = false;
+    `;
+
+    const { rows } = await pool.query(query);
+    return rows;
 }
