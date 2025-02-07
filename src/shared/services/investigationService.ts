@@ -1,4 +1,6 @@
-import { fetchAllInvestigations, fetchInvestigationById, fetchInvestigationsByIds } from "../repositories/investigationRepository";
+import { validateInvestigation } from "../models/investigationData";
+import { fetchAllInvestigations, fetchInvestigationById, fetchInvestigationsByIds, modifyInvestigationPrice } from "../repositories/investigationRepository";
+import { addAuditTrailRecord } from "./auditTrailService";
 
 export async function getInvestigationById(investigationId: number) {
     if (investigationId == undefined) {
@@ -14,7 +16,7 @@ export async function getAllInvestigations(limit: number, offset: number, search
 
 export async function checkInvalidInvestigationIds(ids: number[]) {
     const result = await fetchInvestigationsByIds(ids);
-    if (result ) {
+    if (result) {
         const foundIds = new Set(result.map(inv => inv.id));
         const missingIds = ids.filter(id => !foundIds.has(id));
 
@@ -22,4 +24,19 @@ export async function checkInvalidInvestigationIds(ids: number[]) {
     }
 
     return ids;
+}
+
+export async function updateInvestigationPrice(id: number, investigationDetails: any) {
+    const updatingInvestigation = validateInvestigation(investigationDetails);
+
+    const oldInvestigation = await fetchInvestigationById(id);
+
+    if (oldInvestigation.version != updatingInvestigation.version) {
+        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+    } else {
+        const res = await modifyInvestigationPrice(id, updatingInvestigation.price, updatingInvestigation.version);
+        //TODO: update userId 
+        addAuditTrailRecord("user001", "Update investigation price", { new: updatingInvestigation, old: oldInvestigation });
+        return res;
+    }
 }

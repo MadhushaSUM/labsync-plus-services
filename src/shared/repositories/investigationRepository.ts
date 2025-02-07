@@ -2,7 +2,7 @@ import pool from '../lib/db';
 
 export async function fetchInvestigationById(investigationId: number) {
     const query = `
-        SELECT * FROM public."Investigation"
+        SELECT * FROM public.tests
         WHERE id = $1;
     `;
 
@@ -46,4 +46,21 @@ export async function fetchAllInvestigations(limit: number, offset: number, sear
         totalCount,
         totalPages
     };
+}
+
+export async function modifyInvestigationPrice(id: number, price: number, version: number) {
+    const query = `
+        UPDATE public.tests
+        SET price = $1, version = $2
+        WHERE id = $3
+        RETURNING *;
+    `;
+
+    const { rows } = await pool.query(query, [
+        price,
+        version + 1,
+        id
+    ]);
+
+    return rows[0];
 }

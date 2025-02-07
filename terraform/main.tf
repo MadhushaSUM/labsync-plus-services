@@ -167,6 +167,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "update-investigation-price"
+      handler     = "index.handler"
+      filename    = "investigation/update-investigation-price/update-investigation-price.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 
