@@ -183,6 +183,30 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "add-update-normal-range-by-test-field-id"
+      handler     = "index.handler"
+      filename    = "normal-ranges/add-update-normal-range-by-test-field-id/add-update-normal-range-by-test-field-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
+      name        = "get-normal-ranges-by-test-field-id"
+      handler     = "index.handler"
+      filename    = "normal-ranges/get-normal-ranges-by-test-field-id/get-normal-ranges-by-test-field-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
+      name        = "get-normal-ranges-by-test-id"
+      handler     = "index.handler"
+      filename    = "normal-ranges/get-normal-ranges-by-test-id/get-normal-ranges-by-test-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 
