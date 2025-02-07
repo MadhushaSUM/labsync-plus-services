@@ -64,3 +64,11 @@ export async function modifyInvestigationPrice(id: number, price: number, versio
 
     return rows[0];
 }
+
+export async function fetchInvestigationFieldsByTestId(testId: number) {
+    const query = `SELECT * FROM public.test_fields WHERE test_id = $1`;
+
+    const { rows: investigationFileds } = await pool.query(query, [testId]);
+
+    return investigationFileds;
+}

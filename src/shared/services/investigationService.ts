@@ -1,5 +1,5 @@
 import { validateInvestigation } from "../models/investigationData";
-import { fetchAllInvestigations, fetchInvestigationById, fetchInvestigationsByIds, modifyInvestigationPrice } from "../repositories/investigationRepository";
+import { fetchAllInvestigations, fetchInvestigationById, fetchInvestigationFieldsByTestId, fetchInvestigationsByIds, modifyInvestigationPrice } from "../repositories/investigationRepository";
 import { addAuditTrailRecord } from "./auditTrailService";
 
 export async function getInvestigationById(investigationId: number) {
@@ -39,4 +39,11 @@ export async function updateInvestigationPrice(id: number, investigationDetails:
         addAuditTrailRecord("user001", "Update investigation price", { new: updatingInvestigation, old: oldInvestigation });
         return res;
     }
+}
+
+export async function getInvestigationFieldsByTestId(testId: number) {
+    if (testId == undefined) {
+        throw new Error("Investigation id must be defined");
+    }
+    return await fetchInvestigationFieldsByTestId(testId);
 }

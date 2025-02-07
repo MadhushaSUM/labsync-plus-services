@@ -175,6 +175,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "get-investigation-fields-by-test-id"
+      handler     = "index.handler"
+      filename    = "investigation/get-investigation-fields-by-test-id/get-investigation-fields-by-test-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 

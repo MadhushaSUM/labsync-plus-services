@@ -5,3 +5,11 @@ export interface Test {
     price: number;
     version: number;
 }
+
+export interface TestField {
+    id: number;
+    test_id: number;
+    name: string;
+    code: string;
+    vestion: number;
+}
