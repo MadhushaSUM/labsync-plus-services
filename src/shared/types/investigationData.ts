@@ -3,7 +3,12 @@ import { InvestigationBase } from "../models/investigation/investigationBase";
 export interface InvestigationData {
     investigation_registration_id: number;
     investigation_id: number;
+    doctor_id?: number;
     data: InvestigationBase;
+    options: object;
+    data_added: boolean;
+    printed: boolean;
+    version: number;
 }
 
 export interface DataEmptyTests {
@@ -20,4 +25,5 @@ export interface DataEmptyTests {
     doctorId?: number;
     doctorName?: string;
     data?: Record<string, any>;
+    version: number;
 }

@@ -1,18 +1,27 @@
 import { validateInvestigationDataRequestBody } from "../models/investigationData";
 import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations } from "../repositories/investigationDataRepository";
-import { DataEmptyTests, InvestigationData } from "../types/investigationData";
+import { DataEmptyTests } from "../types/investigationData";
+import { addAuditTrailRecord } from "./auditTrailService";
 
 export async function addInvestigationData(investigationRegistrationId: number, investigationId: number, body: any) {
-    const validatedDataBody = await validateInvestigationDataRequestBody(investigationId, body);
+    const validatedDataBody = await validateInvestigationDataRequestBody(investigationId, body.data);
+    
+    const oldInvestigationData = await getInvestigationData(investigationRegistrationId, investigationId);
+    if (oldInvestigationData.version != body.version) {
+        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+    } else {
+        const res = await saveInvestigationData(
+            investigationRegistrationId,
+            investigationId,
+            validatedDataBody,
+            body.options,
+            body.doctor_id
+        );
 
-    const investigation_data: InvestigationData = {
-        investigation_registration_id: investigationRegistrationId,
-        investigation_id: investigationId,
-        data: validatedDataBody
+        //TODO: update userId 
+        addAuditTrailRecord("user001", oldInvestigationData.version == 1 ? "Add investigation data" : "Update investigation data", { old: oldInvestigationData, new: res });
+        return { new: oldInvestigationData.version == 1, content: res };
     }
-
-    await saveInvestigationData(investigation_data);
-    return investigation_data;
 }
 
 export async function getInvestigationData(investigationRegistrationId: number, investigationId: number) {
@@ -32,7 +41,7 @@ export async function getDataEmptyInvestigations() {
 
     rows.forEach(row => {
         registrations.push({
-            testRegisterId: row.test_register_id,
+            testRegisterId: row.registrations_id,
             testId: row.test_id,
             testName: row.test_name,
             patientId: row.patient_id,
@@ -44,7 +53,8 @@ export async function getDataEmptyInvestigations() {
             doctorName: row.doctor_name,
             ref_number: row.ref_number,
             data: row.data,
-            options: row.options
+            options: row.options,
+            version: row.version,
         });
     });
 

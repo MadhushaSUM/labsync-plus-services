@@ -1,46 +1,41 @@
-import { InvestigationData } from '../types/investigationData';
 import { InvestigationBase } from '../models/investigation/investigationBase';
 import pool from '../lib/db';
 
-export async function saveInvestigationData(investigation_data: InvestigationData) {
-    const client = await pool.connect();
+export async function saveInvestigationData(registrations_id: number, test_id: number, data: object, options: object, doctor_id?: number) {
     try {
-        await client.query('BEGIN');
+        const query = `
+            UPDATE public.registrations_tests
+            SET doctor_id = $1, data = $2, data_added = true, options = $3, version = registrations_tests.version + 1
+            WHERE registrations_id = $4 AND test_id = $5
+            RETURNING *;
+        `;
 
-        const result = await client.query(
-            `INSERT INTO public."Investigation data"(registration_id, investigation_id, data)
-	        VALUES ($1, $2, $3)`,
-            [investigation_data.investigation_registration_id, investigation_data.investigation_id, investigation_data.data]
-        );
+        const { rows } = await pool.query(query, [
+            doctor_id,
+            JSON.stringify(data),
+            JSON.stringify(options),
+            registrations_id,
+            test_id
+        ]);
 
-        await client.query(
-            `INSERT INTO public."Data Added Investigations" (registration_id, investigation_id)
-            VALUES ($1, $2)`,
-            [investigation_data.investigation_registration_id, investigation_data.investigation_id]
-        );
+        return rows[0];
 
-        await client.query('COMMIT');
-
-        return result;
     } catch (error) {
-        await client.query('ROLLBACK');
         throw error;
-    } finally {
-        client.release();
     }
 }
 
 export async function fetchInvestigationData(investigationRegisterId: number, investigationId: number) {
     try {
         const regResult = await pool.query(
-            `SELECT * FROM public."Investigation data"
-            WHERE registration_id = $1 AND investigation_id = $2`,
+            `SELECT * FROM public.registrations_tests
+            WHERE registrations_id = $1 AND test_id = $2`,
             [investigationRegisterId, investigationId]
         );
 
         return regResult.rows[0];
-    } catch (error: any) {
-        throw new Error(error.message);
+    } catch (error) {
+        throw error;
     }
 }
 
@@ -76,7 +71,8 @@ export async function fetchDataEmptyInvestigations() {
             d.id AS doctor_id,
             d.name AS doctor_name,
             trt.data,
-            trt.options
+            trt.options,
+            trt.version
         FROM registrations AS tr
         INNER JOIN patients AS p ON tr.patient_id = p.id
         INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id

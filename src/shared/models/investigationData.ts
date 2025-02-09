@@ -4,9 +4,19 @@ import { plainToInstance } from 'class-transformer';
 import { FastingBloodSugar } from './investigation/FastingBloodSugar';
 import { InvestigationBase } from './investigation/investigationBase';
 import { Test } from '../types/Investigation';
+import { RandomBloodSugar } from './investigation/RandomBloodSugar';
 
 export async function validateInvestigationDataRequestBody(investigationId: number, body: any): Promise<InvestigationBase> {
-    let requestBody = plainToInstance(FastingBloodSugar, body);
+    let requestBody;
+    switch (Number(investigationId)) {
+        case 1:
+            requestBody = plainToInstance(FastingBloodSugar, body);
+            break;
+        case 2:
+            requestBody = plainToInstance(RandomBloodSugar, body);
+        default:
+            throw new Error(`Invalid investigation id: ${investigationId}`);
+    }
 
     const errors = await validate(requestBody, {
         whitelist: true,

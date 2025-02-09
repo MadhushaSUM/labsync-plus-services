@@ -6,12 +6,12 @@ import {
   } from 'class-validator';
   import { InvestigationBase } from "./investigationBase";
   
-  export class FastingBloodSugar extends InvestigationBase {
+  export class RandomBloodSugar extends InvestigationBase {
     @IsNumber()
     @IsNotEmpty()
-    fbsValue: number;
+    rbsValue: number;
   
     @IsOptional()
     @IsString({ each: true })
-    fbsValueFlag: string | string[] | null;
+    rbsValueFlag: string | string[] | null;
   }
