@@ -10,6 +10,9 @@ import {
     @IsNumber()
     @IsNotEmpty()
     rbsValue: number;
+
+    @IsString()
+    time: string;
   
     @IsOptional()
     @IsString({ each: true })

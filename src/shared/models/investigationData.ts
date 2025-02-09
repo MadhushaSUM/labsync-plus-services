@@ -14,6 +14,7 @@ export async function validateInvestigationDataRequestBody(investigationId: numb
             break;
         case 2:
             requestBody = plainToInstance(RandomBloodSugar, body);
+            break;
         default:
             throw new Error(`Invalid investigation id: ${investigationId}`);
     }
