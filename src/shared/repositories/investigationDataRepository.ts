@@ -169,3 +169,19 @@ export async function fetchDataAddedInvestigations(
     };
 }
 
+export async function markAsPrinted(printed: boolean, investigationRegisterId: number, investigationId: number) {
+    const query = `
+        UPDATE public.registrations_tests
+        SET printed = $1
+        WHERE registrations_id = $2 AND test_id = $3
+        RETURNING *;
+    `;
+
+    const { rows } = await pool.query(query, [
+        printed,
+        investigationRegisterId,
+        investigationId
+    ]);
+
+    return rows[0];
+}

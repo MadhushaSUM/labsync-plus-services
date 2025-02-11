@@ -1,5 +1,5 @@
 import { validateInvestigationDataRequestBody } from "../models/investigationData";
-import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations, fetchDataAddedInvestigations } from "../repositories/investigationDataRepository";
+import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations, fetchDataAddedInvestigations, markAsPrinted } from "../repositories/investigationDataRepository";
 import { DataEmptyTests } from "../types/investigationData";
 import { addAuditTrailRecord } from "./auditTrailService";
 
@@ -92,4 +92,8 @@ export async function getDataAddedInvestigations(limit: number, offset: number, 
     const totalPages = Math.ceil(totalCount / limit);
 
     return { totalCount, registrations, totalPages };
+}
+
+export async function markInvestigationDataAsPrinted(investigationRegisterId: number, investigationId: number) {
+    return await markAsPrinted(true, investigationRegisterId, investigationId)
 }
