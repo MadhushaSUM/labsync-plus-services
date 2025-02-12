@@ -27,6 +27,7 @@ module.exports = {
     'normal-ranges/add-update-normal-range-by-test-field-id': './src/functions/normal-ranges/add-update-normal-range-by-test-field-id/add-update-normal-range-by-test-field-id.ts',
     'normal-ranges/get-normal-ranges-by-test-field-id': './src/functions/normal-ranges/get-normal-ranges-by-test-field-id/get-normal-ranges-by-test-field-id.ts',
     'normal-ranges/get-normal-ranges-by-test-id': './src/functions/normal-ranges/get-normal-ranges-by-test-id/get-normal-ranges-by-test-id.ts',
+    'analysis/get-patient-analysis':'./src/functions/analysis/get-patient-analysis/get-patient-analysis.ts',
   },
   target: 'node',
   mode: 'production',

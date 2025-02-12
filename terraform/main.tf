@@ -112,14 +112,6 @@ module "lambda_functions" {
       timeout     = 120
     },
     {
-      name        = "confirm-investigation-registration"     
-      handler     = "index.handler"  
-      filename    = "investigation-register/confirm-investigation-registration/confirm-investigation-registration.zip"
-      runtime     = "nodejs20.x"
-      memory_size = 128
-      timeout     = 120
-    },
-    {
       name        = "add-investigation-data"     
       handler     = "index.handler"  
       filename    = "investigation-data/add-investigation-data/add-investigation-data.zip"
@@ -223,8 +215,17 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "get-patient-analysis"
+      handler     = "index.handler"
+      filename    = "analysis/get-patient-analysis/get-patient-analysis.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
+
 
 # module "dynamodb_tables" {
 #   source = "./modules/dynamodb"
