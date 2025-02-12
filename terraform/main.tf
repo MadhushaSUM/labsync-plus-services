@@ -231,9 +231,16 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "get-financial-analysis"
+      handler     = "index.handler"
+      filename    = "analysis/get-financial-analysis/get-financial-analysis.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
-
 
 # module "dynamodb_tables" {
 #   source = "./modules/dynamodb"
