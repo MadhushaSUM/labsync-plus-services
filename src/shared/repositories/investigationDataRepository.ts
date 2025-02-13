@@ -185,3 +185,20 @@ export async function markAsPrinted(printed: boolean, investigationRegisterId: n
 
     return rows[0];
 }
+
+export async function markAsDataAdded(data_added: boolean, investigationRegisterId: number, investigationId: number) {
+    const query = `
+        UPDATE public.registrations_tests
+        SET data_added = $1
+        WHERE registrations_id = $2 AND test_id = $3
+        RETURNING *;
+    `;
+
+    const { rows } = await pool.query(query, [
+        data_added,
+        investigationRegisterId,
+        investigationId
+    ]);
+
+    return rows[0];
+}

@@ -20,6 +20,7 @@ module.exports = {
     'investigation-data/get-data-empty-investigations': './src/functions/investigation-data/get-data-empty-investigations/get-data-empty-investigations.ts',
     'investigation-data/get-data-added-investigations': './src/functions/investigation-data/get-data-added-investigations/get-data-added-investigations.ts',
     'investigation-data/mark-investigation-as-printed': './src/functions/investigation-data/mark-investigation-as-printed/mark-investigation-as-printed.ts',
+    'investigation-data/mark-investigation-as-data-not-added': './src/functions/investigation-data/mark-investigation-as-data-not-added/mark-investigation-as-data-not-added.ts',
     'audit-trail/get-all-audit-trail-records': './src/functions/audit-trail/get-all-audit-trail-records/get-all-audit-trail-records.ts',
     'investigation/get-all-investigations': './src/functions/investigation/get-all-investigations/get-all-investigations.ts',
     'investigation/update-investigation-price': './src/functions/investigation/update-investigation-price/update-investigation-price.ts',

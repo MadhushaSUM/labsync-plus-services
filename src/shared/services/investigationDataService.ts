@@ -1,5 +1,5 @@
 import { validateInvestigationDataRequestBody } from "../models/investigationData";
-import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations, fetchDataAddedInvestigations, markAsPrinted } from "../repositories/investigationDataRepository";
+import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations, fetchDataAddedInvestigations, markAsPrinted, markAsDataAdded } from "../repositories/investigationDataRepository";
 import { DataEmptyTests } from "../types/investigationData";
 import { addAuditTrailRecord } from "./auditTrailService";
 
@@ -96,4 +96,8 @@ export async function getDataAddedInvestigations(limit: number, offset: number, 
 
 export async function markInvestigationDataAsPrinted(investigationRegisterId: number, investigationId: number) {
     return await markAsPrinted(true, investigationRegisterId, investigationId)
+}
+
+export async function markInvestigationDataAsDataAdded(data_added: boolean, investigationRegisterId: number, investigationId: number) {
+    return await markAsDataAdded(data_added, investigationRegisterId, investigationId)
 }

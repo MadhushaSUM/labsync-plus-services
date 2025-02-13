@@ -160,6 +160,14 @@ module "lambda_functions" {
       timeout     = 120
     },
     {
+      name        = "mark-investigation-as-data-not-added"
+      handler     = "index.handler"
+      filename    = "investigation-data/mark-investigation-as-data-not-added/mark-investigation-as-data-not-added.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
       name        = "get-all-audit-trail-records"
       handler     = "index.handler"
       filename    = "audit-trail/get-all-audit-trail-records/get-all-audit-trail-records.zip"
