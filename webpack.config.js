@@ -33,6 +33,7 @@ module.exports = {
     'analysis/get-financial-analysis': './src/functions/analysis/get-financial-analysis/get-financial-analysis.ts',
     'auth/register-new-user': './src/functions/auth/register-new-user/register-new-user.ts',
     'auth/user-login': './src/functions/auth/user-login/user-login.ts',
+    'auth/get-user-by-id': './src/functions/auth/get-user-by-id/get-user-by-id.ts',
   },
   target: 'node',
   mode: 'production',

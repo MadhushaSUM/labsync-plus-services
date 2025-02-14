@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { fetchUserByEmail, saveUser } from "../repositories/userRepository";
+import { fetchUserByEmail, fetchUserById, saveUser } from "../repositories/userRepository";
 
 export async function registerNewUser(name: string, email: string, password: string) {
     if (!name || !email || !password) {
@@ -41,6 +41,7 @@ export async function userLogin(email: string, password: string) {
 
     if (passwordsMatch) {
         return {
+            id: user.id,
             name: user.name,
             email: user.email,
             //TODO: add fields like role
@@ -48,4 +49,13 @@ export async function userLogin(email: string, password: string) {
     } else {
         throw new Error("Invalid username or password!");
     }
+}
+
+export async function getUserById(id: number) {
+    if (id == undefined) {
+        throw new Error("user id must be defined!");
+    }
+    const { password, ...rest } = await fetchUserById(id);
+
+    return { ...rest };
 }

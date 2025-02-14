@@ -263,6 +263,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "get-user-by-id"
+      handler     = "index.handler"
+      filename    = "auth/get-user-by-id/get-user-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 

@@ -10,6 +10,16 @@ export async function fetchUserByEmail(email: string) {
     return rows[0];
 }
 
+export async function fetchUserById(id: number) {
+    const query = `
+        SELECT * FROM public.users
+        WHERE id = $1;
+    `;
+
+    const { rows } = await pool.query(query, [id]);
+    return rows[0];
+}
+
 export async function saveUser(name: string, email: string, password: string) {
     const query = `
         INSERT INTO public.users(name, email, password)
