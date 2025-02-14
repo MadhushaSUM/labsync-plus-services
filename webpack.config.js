@@ -32,6 +32,7 @@ module.exports = {
     'analysis/get-investigation-analysis': './src/functions/analysis/get-investigation-analysis/get-investigation-analysis.ts',
     'analysis/get-financial-analysis': './src/functions/analysis/get-financial-analysis/get-financial-analysis.ts',
     'auth/register-new-user': './src/functions/auth/register-new-user/register-new-user.ts',
+    'auth/user-login': './src/functions/auth/user-login/user-login.ts',
   },
   target: 'node',
   mode: 'production',

@@ -255,6 +255,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "user-login"
+      handler     = "index.handler"
+      filename    = "auth/user-login/user-login.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 
