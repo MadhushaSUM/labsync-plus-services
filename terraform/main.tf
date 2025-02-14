@@ -247,6 +247,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "register-new-user"
+      handler     = "index.handler"
+      filename    = "auth/register-new-user/register-new-user.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 

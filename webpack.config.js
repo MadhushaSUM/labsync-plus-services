@@ -31,6 +31,7 @@ module.exports = {
     'analysis/get-patient-analysis': './src/functions/analysis/get-patient-analysis/get-patient-analysis.ts',
     'analysis/get-investigation-analysis': './src/functions/analysis/get-investigation-analysis/get-investigation-analysis.ts',
     'analysis/get-financial-analysis': './src/functions/analysis/get-financial-analysis/get-financial-analysis.ts',
+    'auth/register-new-user': './src/functions/auth/register-new-user/register-new-user.ts',
   },
   target: 'node',
   mode: 'production',
