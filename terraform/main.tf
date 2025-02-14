@@ -271,6 +271,31 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+
+    {
+      name        = "create-branch"
+      handler     = "index.handler"
+      filename    = "branches/create-branch/create-branch.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
+      name        = "get-all-branches"
+      handler     = "index.handler"
+      filename    = "branches/get-all-branches/get-all-branches.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
+      name        = "update-branch"
+      handler     = "index.handler"
+      filename    = "branches/update-branch/update-branch.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 
