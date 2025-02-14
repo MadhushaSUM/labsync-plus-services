@@ -271,7 +271,22 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
-
+    {
+      name        = "get-all-users"
+      handler     = "index.handler"
+      filename    = "auth/get-all-users/get-all-users.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
+      name        = "update-user"
+      handler     = "index.handler"
+      filename    = "auth/update-user/update-user.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
     {
       name        = "create-branch"
       handler     = "index.handler"

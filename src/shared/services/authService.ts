@@ -1,5 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { fetchUserByEmail, fetchUserById, saveUser } from "../repositories/userRepository";
+import { fetchAllUsers, fetchUserByEmail, fetchUserById, modifyUser, saveUser } from "../repositories/userRepository";
+import { addAuditTrailRecord } from './auditTrailService';
+import { validateUser } from '../models/user';
 
 export async function registerNewUser(name: string, email: string, password: string) {
     if (!name || !email || !password) {
@@ -21,6 +23,8 @@ export async function registerNewUser(name: string, email: string, password: str
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     await saveUser(name, email, hashedPassword);
+    //TODO: update userId 
+    addAuditTrailRecord("user001", "New user registration", { name, email });
 }
 
 export async function userLogin(email: string, password: string) {
@@ -58,4 +62,24 @@ export async function getUserById(id: number) {
     const { password, ...rest } = await fetchUserById(id);
 
     return { ...rest };
+}
+
+export async function getAllUsers(limit: number, offset: number, search?: string) {
+    return await fetchAllUsers(limit, offset, search);
+}
+
+export async function updateUser(id: number, userDetails: any) {
+    const updatingUser = validateUser(userDetails);
+
+    const oldUser = await fetchUserById(id);
+
+    if (oldUser.version != updatingUser.version) {
+        throw new Error("Version mismatch. Please fetch the latest version before updating!");
+    } else {
+        const res = await modifyUser(id, updatingUser);
+        //TODO: update userId 
+        const { password, ...rest } = oldUser
+        addAuditTrailRecord("user001", "Update user", { new: updatingUser, old: { ...rest } });
+        return res;
+    }
 }
