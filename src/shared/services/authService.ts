@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { fetchAllUsers, fetchUserByEmail, fetchUserById, modifyUser, saveUser } from "../repositories/userRepository";
 import { addAuditTrailRecord } from './auditTrailService';
 import { validateUser } from '../models/user';
+import { UserType } from '../types/user';
 
 export async function registerNewUser(name: string, email: string, password: string) {
     if (!name || !email || !password) {
@@ -59,13 +60,37 @@ export async function getUserById(id: number) {
     if (id == undefined) {
         throw new Error("user id must be defined!");
     }
-    const { password, ...rest } = await fetchUserById(id);
-
-    return { ...rest };
+    return await fetchUserById(id);
 }
 
 export async function getAllUsers(limit: number, offset: number, search?: string) {
-    return await fetchAllUsers(limit, offset, search);
+    const results = await fetchAllUsers(limit, offset, search);
+
+    const usersArr: UserType[] = [];
+    for (const user of results.users) {
+        usersArr.push({
+            id: user.user_id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            emailVerified: user.emailVerified,
+            image: user.image,
+            branch: {
+                id: user.branch_id,
+                name: user.branch_name,
+                address: user.branch_address,
+                telephone: user.branch_telephone,
+                version: user.branch_version,
+            },
+            version: user.user_version,
+        });
+    }
+
+    return {
+        users: usersArr,
+        totalCount: results.totalCount,
+        totalPages: results.totalPages,
+    }
 }
 
 export async function updateUser(id: number, userDetails: any) {
@@ -78,8 +103,7 @@ export async function updateUser(id: number, userDetails: any) {
     } else {
         const res = await modifyUser(id, updatingUser);
         //TODO: update userId 
-        const { password, ...rest } = oldUser
-        addAuditTrailRecord("user001", "Update user", { new: updatingUser, old: { ...rest } });
+        addAuditTrailRecord("user001", "Update user", { new: updatingUser, old: oldUser });
         return res;
     }
 }
