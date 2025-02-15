@@ -1,9 +1,34 @@
 import { getPatientAnalysisData } from "../../../shared/services/analysisService";
+import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { patientId, startDate, endDate } = event.queryStringParameters;
+    const { patientId, startDate, endDate, userId } = event.queryStringParameters;
 
     try {
+        const { isActive, isAdmin } = await checkUserSessionInfo(Number(userId));
+        if (!isActive) {
+            return {
+                statusCode: 401,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+                },
+                body: JSON.stringify({ message: "No active session!" })
+            };
+        }
+        if (!isAdmin) {
+            return {
+                statusCode: 403,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+                },
+                body: JSON.stringify({ message: "Admin privileges required!" })
+            };
+        }
+
         const result = await getPatientAnalysisData(patientId, startDate, endDate);
 
         return {

@@ -45,4 +45,6 @@ resource "aws_lambda_function" "lambda" {
   timeout       = each.value.timeout
   role          = aws_iam_role.iam_lambda_role.arn
   filename      = "${path.module}/../../../bundled/${each.value.filename}"
+
+  source_code_hash = filebase64sha256("${path.module}/../../../bundled/${each.value.filename}")
 }

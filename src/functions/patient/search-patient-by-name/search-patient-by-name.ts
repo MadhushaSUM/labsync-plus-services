@@ -1,9 +1,24 @@
 import { searchPatientByName } from "../../../shared/services/patientService";
+import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
+    const { userId, query } = event.queryStringParameters;
 
     try {
-        const result = await searchPatientByName(event.queryStringParameters.query);
+        const { isActive } = await checkUserSessionInfo(Number(userId));
+        if (!isActive) {
+            return {
+                statusCode: 401,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+                },
+                body: JSON.stringify({ message: "No active session!" })
+            };
+        }
+
+        const result = await searchPatientByName(query);
 
         if (result) {
             return {

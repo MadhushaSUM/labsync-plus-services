@@ -1,9 +1,23 @@
 import { getInvestigationFieldsByTestId } from "../../../shared/services/investigationService";
+import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { testId } = event.queryStringParameters;
+    const { testId, userId } = event.queryStringParameters;
 
     try {
+        const { isActive } = await checkUserSessionInfo(Number(userId));
+        if (!isActive) {
+            return {
+                statusCode: 401,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+                },
+                body: JSON.stringify({ message: "No active session!" })
+            };
+        }
+
         const result = await getInvestigationFieldsByTestId(testId);
         return {
             statusCode: 200,

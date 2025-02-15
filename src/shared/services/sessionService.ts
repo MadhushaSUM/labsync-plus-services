@@ -11,13 +11,16 @@ export async function expireSessionByUserId(userId: number) {
 }
 
 export async function checkUserSessionInfo(userId: number) {
+    if (!userId) {
+        throw new Error("Authentication error");
+    }
     const sessionInfo = await checkSession(userId);
     const userInfo = await getUserById(userId);
     if (sessionInfo) {
         return {
             isAdmin: userInfo.role == "admin",
-            isActive: sessionInfo.isActive,
-            timeRemaining: sessionInfo.timeRemaining,
+            isActive: sessionInfo.isactive,
+            timeRemaining: sessionInfo.timeremaining,
             expires: sessionInfo.expires,
         }
     } else {

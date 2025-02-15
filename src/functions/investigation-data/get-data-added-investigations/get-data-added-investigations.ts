@@ -1,10 +1,24 @@
 import { getDataAddedInvestigations } from "../../../shared/services/investigationDataService";
+import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { limit, offset, patientId, startDate, endDate, refNumber, allReports } = event.queryStringParameters;
+    const { limit, offset, patientId, startDate, endDate, refNumber, allReports, userId } = event.queryStringParameters;
 
     try {
-        const result = await getDataAddedInvestigations(limit, offset, patientId, startDate, endDate, refNumber, allReports );
+        const { isActive } = await checkUserSessionInfo(Number(userId));
+        if (!isActive) {
+            return {
+                statusCode: 401,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+                },
+                body: JSON.stringify({ message: "No active session!" })
+            };
+        }
+
+        const result = await getDataAddedInvestigations(limit, offset, patientId, startDate, endDate, refNumber, allReports);
 
         return {
             statusCode: 200,

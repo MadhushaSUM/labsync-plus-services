@@ -128,14 +128,6 @@ module "lambda_functions" {
       timeout     = 120
     },
     {
-      name        = "update-investigation-data"     
-      handler     = "index.handler"  
-      filename    = "investigation-data/update-investigation-data/update-investigation-data.zip"
-      runtime     = "nodejs20.x"
-      memory_size = 128
-      timeout     = 120
-    },
-    {
       name        = "get-data-empty-investigations"     
       handler     = "index.handler"  
       filename    = "investigation-data/get-data-empty-investigations/get-data-empty-investigations.zip"

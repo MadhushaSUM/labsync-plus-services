@@ -1,9 +1,23 @@
 import { getAllBranches } from "../../../shared/services/branchService";
+import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { limit, offset, search } = event.queryStringParameters;
+    const { limit, offset, search, userId } = event.queryStringParameters;
 
     try {
+        const { isActive } = await checkUserSessionInfo(Number(userId));
+        if (!isActive) {
+            return {
+                statusCode: 401,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+                },
+                body: JSON.stringify({ message: "No active session!" })
+            };
+        }
+
         const result = await getAllBranches(limit, offset, search);
 
         return {

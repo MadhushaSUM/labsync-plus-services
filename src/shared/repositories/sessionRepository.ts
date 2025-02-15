@@ -57,7 +57,7 @@ export async function checkSession(userId: number) {
       `;
         const values = [userId];
         const result = await client.query(query, values);
-        return (result.rows[0] as { isActive: boolean; timeRemaining: any; expires: Date; }) || null;
+        return (result.rows[0] as { isactive: boolean; timeremaining: any; expires: Date; }) || null;
     } catch (error) {
         throw error;
     } finally {
