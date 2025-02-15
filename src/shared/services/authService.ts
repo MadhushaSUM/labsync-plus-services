@@ -3,6 +3,7 @@ import { fetchAllUsers, fetchUserByEmail, fetchUserById, modifyUser, saveUser } 
 import { addAuditTrailRecord } from './auditTrailService';
 import { validateUser } from '../models/user';
 import { UserType } from '../types/user';
+import { createSessionByUserId } from './sessionService';
 
 export async function registerNewUser(name: string, email: string, password: string) {
     if (!name || !email || !password) {
@@ -45,6 +46,9 @@ export async function userLogin(email: string, password: string) {
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (passwordsMatch) {
+        // Creating a session
+        await createSessionByUserId(user.id);
+
         return {
             id: user.id,
             name: user.name,

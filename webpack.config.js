@@ -33,6 +33,7 @@ module.exports = {
     'analysis/get-financial-analysis': './src/functions/analysis/get-financial-analysis/get-financial-analysis.ts',
     'auth/register-new-user': './src/functions/auth/register-new-user/register-new-user.ts',
     'auth/user-login': './src/functions/auth/user-login/user-login.ts',
+    'auth/user-logout': './src/functions/auth/user-logout/user-logout.ts',
     'auth/get-user-by-id': './src/functions/auth/get-user-by-id/get-user-by-id.ts',
     'auth/get-all-users': './src/functions/auth/get-all-users/get-all-users.ts',
     'auth/update-user': './src/functions/auth/update-user/update-user.ts',
