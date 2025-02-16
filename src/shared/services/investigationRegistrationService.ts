@@ -25,8 +25,8 @@ export async function addInvestigationRegistration(invReg: any) {
     return res;
 }
 
-export async function getAllInvestigationRegistrations(limit: number, offset: number, patientId: number, startDate?: string, endDate?: string, refNumber?: number) {
-    const rows = await fetchAllInvestigationRegistrations(offset, limit, startDate, endDate, patientId, refNumber);
+export async function getAllInvestigationRegistrations(limit: number, offset: number, patientId: number, startDate?: string, endDate?: string, refNumber?: number, branchId?: number) {
+    const rows = await fetchAllInvestigationRegistrations(offset, limit, startDate, endDate, patientId, refNumber, branchId);
 
     if (rows.length === 0) {
         return { totalCount: 0, totalPages: 0, registrations: [] };
@@ -55,6 +55,13 @@ export async function getAllInvestigationRegistrations(limit: number, offset: nu
                 paid_price: row.paid_price,
                 collected: row.collected,
                 registeredTests: [],
+                branch: {
+                    id: row.branch_id,
+                    name: row.branch_name,
+                    address: row.branch_address,
+                    telephone: row.branch_telephone,
+                    version: row.branch_version,
+                },
                 version: row.registration_version,
             };
             registrationMap.set(row.registrations_id, registration);
@@ -116,6 +123,13 @@ export async function getInvestigationRegistrationById(invRegId: number) {
         total_cost: rows[0].total_cost,
         paid_price: rows[0].paid_price,
         collected: rows[0].collected,
+        branch: {
+            id: rows[0].branch_id,
+            name: rows[0].branch_name,
+            address: rows[0].branch_address,
+            telephone: rows[0].branch_telephone,
+            version: rows[0].branch_version,
+        },
         version: rows[0].registration_version,
         registeredTests: rows.map(row => ({
             test: {

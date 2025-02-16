@@ -2,7 +2,7 @@ import { getInvestigationAnalysisData } from "../../../shared/services/analysisS
 import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { startDate, endDate, userId } = event.queryStringParameters;
+    const { startDate, endDate, userId, branchId } = event.queryStringParameters;
 
     try {
         const { isActive, isAdmin } = await checkUserSessionInfo(Number(userId));
@@ -29,7 +29,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await getInvestigationAnalysisData(startDate, endDate);
+        const result = await getInvestigationAnalysisData(startDate, endDate, branchId);
 
         return {
             statusCode: 200,

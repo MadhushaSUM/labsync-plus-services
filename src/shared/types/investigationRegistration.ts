@@ -1,3 +1,4 @@
+import { BranchType } from "./branch";
 import { DoctorType } from "./doctor";
 import { Test } from "./Investigation";
 import { PatientType } from "./patient";
@@ -21,5 +22,6 @@ export interface Registration {
     paid_price: number;
     collected: boolean;
     registeredTests: RegisteredTest[];
+    branch: BranchType;
     version: number;
 }

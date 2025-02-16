@@ -2,7 +2,7 @@ import { getDataEmptyInvestigations } from "../../../shared/services/investigati
 import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { userId } = event.queryStringParameters;
+    const { userId, branchId } = event.queryStringParameters;
 
     try {
         const { isActive } = await checkUserSessionInfo(Number(userId));
@@ -18,7 +18,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await getDataEmptyInvestigations();
+        const result = await getDataEmptyInvestigations(branchId);
 
         return {
             statusCode: 200,

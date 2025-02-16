@@ -2,7 +2,7 @@ import { getAllInvestigationRegistrations } from "../../../shared/services/inves
 import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { limit, offset, patientId, startDate, endDate, refNumber, userId } = event.queryStringParameters;
+    const { limit, offset, patientId, startDate, endDate, refNumber, branchId, userId } = event.queryStringParameters;
 
     try {
         const { isActive } = await checkUserSessionInfo(Number(userId));
@@ -18,7 +18,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await getAllInvestigationRegistrations(limit, offset, patientId, startDate, endDate, refNumber);
+        const result = await getAllInvestigationRegistrations(limit, offset, patientId, startDate, endDate, refNumber, branchId);
 
         return {
             statusCode: 200,

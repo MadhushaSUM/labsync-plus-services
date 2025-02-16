@@ -1,4 +1,3 @@
-import { getInvestigationRegistrationById } from "../services/investigationRegistrationService";
 
 export async function validateInvestigationRegister(invReg: any) {
     if (

@@ -80,11 +80,17 @@ export async function fetchInvestigationRegistrationById(id: number) {
             trt.options,
             trt.data_added,
             trt.printed,
-            trt.version AS registration_test_version
+            trt.version AS registration_test_version,
+            b.id AS branch_id,
+            b.name AS branch_name,
+            b.address AS branch_address,
+            b.telephone AS branch_telephone,
+            b.version AS branch_version
         FROM registrations AS tr
         INNER JOIN patients AS p ON tr.patient_id = p.id
         INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
         INNER JOIN tests AS t ON trt.test_id = t.id
+        INNER JOIN branches AS b ON tr.branch_id = b.id
         LEFT JOIN doctors AS d ON trt.doctor_id = d.id
         WHERE tr.id = $1;
     `;
@@ -174,7 +180,8 @@ export async function fetchAllInvestigationRegistrations(
     fromDate?: string,
     toDate?: string,
     patientId?: number,
-    refNumber?: number
+    refNumber?: number,
+    branchId?: number
 ) {
     try {
         let baseQuery = `
@@ -204,11 +211,17 @@ export async function fetchAllInvestigationRegistrations(
             trt.options,
             trt.data_added,
             trt.printed,
-            trt.version AS registration_test_version
+            trt.version AS registration_test_version,
+            b.id AS branch_id,
+            b.name AS branch_name,
+            b.address AS branch_address,
+            b.telephone AS branch_telephone,
+            b.version AS branch_version
         FROM registrations AS tr
         INNER JOIN patients AS p ON tr.patient_id = p.id
         INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
         INNER JOIN tests AS t ON trt.test_id = t.id
+        INNER JOIN branches AS b ON tr.branch_id = b.id
         LEFT JOIN doctors AS d ON trt.doctor_id = d.id
     `;
 
@@ -230,6 +243,10 @@ export async function fetchAllInvestigationRegistrations(
         if (refNumber) {
             conditions.push(`tr.ref_number = $${params.length + 1}`);
             params.push(refNumber);
+        }
+        if (branchId) {
+            conditions.push(`tr.branch_id = $${params.length + 1}`);
+            params.push(branchId);
         }
 
         const filteredRegisterConditions = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

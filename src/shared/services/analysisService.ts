@@ -3,8 +3,8 @@ import { AnalysisData, FinancialAnalysisOutput } from "../types/investigationDat
 import { getInvestigationRegistrationById } from "./investigationRegistrationService";
 import { getAllInvestigations } from "./investigationService";
 
-export async function getPatientAnalysisData(patientId: number, startDate?: string, endDate?: string) {
-    const testRegisters = await fetchTestRegistrationByPatient(patientId, startDate, endDate);
+export async function getPatientAnalysisData(patientId: number, startDate?: string, endDate?: string, branchId?: number) {
+    const testRegisters = await fetchTestRegistrationByPatient(patientId, startDate, endDate, branchId);
 
     let totalCount = 0;
     const dataMap = new Map<number, {
@@ -54,8 +54,8 @@ export async function getPatientAnalysisData(patientId: number, startDate?: stri
     return { data };
 }
 
-export async function getInvestigationAnalysisData(startDate?: string, endDate?: string) {
-    const testRegisters = await getTestRegistrationsForDateRange(startDate, endDate);
+export async function getInvestigationAnalysisData(startDate?: string, endDate?: string, branchId?: number) {
+    const testRegisters = await getTestRegistrationsForDateRange(startDate, endDate, branchId);
 
     let totalCount = 0;
     const dataMap = new Map<number, {
@@ -105,29 +105,29 @@ export async function getInvestigationAnalysisData(startDate?: string, endDate?:
     return { data };
 }
 
-export async function getFinancialAnalysisData(step: string, startDate?: string, endDate?: string) {
-    const data = await getPeriodsWithTestRegisterIds(step, startDate, endDate);
+export async function getFinancialAnalysisData(step: string, startDate?: string, endDate?: string, branchId?: number) {
+    const data = await getPeriodsWithTestRegisterIds(step, startDate, endDate, branchId);
     const tests = await getAllInvestigations(100, 0, '');
     const testPriceMap = new Map<number, number>();
-    
+
     for (const test of tests.investigations) {
         testPriceMap.set(test.id, test.price);
     }
-    
+
     const out: FinancialAnalysisOutput = {
         totalCost: 0,
         totalPaid: 0,
         periods: []
     }
-    
+
     let totalCost = 0;
     let totalPaid = 0;
-    
+
     for (const period of data) {
         let periodCost = 0;
         let periodPaid = 0;
         const detailsMap = new Map<number, number>();
-        
+
         // Check if testRegisterIds is an array and not empty
         if (Array.isArray(period.testRegisterIds) && period.testRegisterIds.length > 0) {
             // Process each registration ID
@@ -139,7 +139,7 @@ export async function getFinancialAnalysisData(step: string, startDate?: string,
                         totalPaid += testRegister.paid_price;
                         periodCost += testRegister.total_cost;
                         periodPaid += testRegister.paid_price;
-                        
+
                         for (const test of testRegister.registeredTests) {
                             const cost = detailsMap.get(test.test.id);
                             if (!cost) {
@@ -156,13 +156,13 @@ export async function getFinancialAnalysisData(step: string, startDate?: string,
                 }
             }
         }
-        
+
         const periodTestDetails = Array.from(detailsMap, ([key, value]) => ({
             testId: key,
             testName: tests.investigations.find(item => item.id === key)?.name ?? 'Unknown Test',
             testTotalCost: value
         }));
-        
+
         out.periods.push({
             startDate: period.startDateOfPeriod,
             endDate: period.endDateOfPeriod,
@@ -171,7 +171,7 @@ export async function getFinancialAnalysisData(step: string, startDate?: string,
             tests: periodTestDetails
         });
     }
-    
+
     out.totalCost = totalCost;
     out.totalPaid = totalPaid;
     return { data: out };

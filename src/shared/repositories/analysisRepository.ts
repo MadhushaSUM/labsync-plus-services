@@ -1,7 +1,7 @@
 import pool from "../lib/db";
 import { Registration } from "../types/investigationRegistration";
 
-export async function fetchTestRegistrationByPatient(patientId: number, startDate?: string, endDate?: string) {
+export async function fetchTestRegistrationByPatient(patientId: number, startDate?: string, endDate?: string, branchId?: number) {
     let baseQuery = `
         SELECT 
             tr.id AS registrations_id,
@@ -29,11 +29,17 @@ export async function fetchTestRegistrationByPatient(patientId: number, startDat
             trt.options,
             trt.data_added,
             trt.printed,
-            trt.version AS registration_test_version
+            trt.version AS registration_test_version,
+            b.id AS branch_id,
+            b.name AS branch_name,
+            b.address AS branch_address,
+            b.telephone AS branch_telephone,
+            b.version AS branch_version
         FROM registrations AS tr
         INNER JOIN patients AS p ON tr.patient_id = p.id
         INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
         INNER JOIN tests AS t ON trt.test_id = t.id
+        INNER JOIN branches AS b ON tr.branch_id = b.id
         LEFT JOIN doctors AS d ON trt.doctor_id = d.id
         WHERE tr.patient_id = ${patientId} 
     `;
@@ -49,6 +55,11 @@ export async function fetchTestRegistrationByPatient(patientId: number, startDat
     if (endDate) {
         conditions.push(`tr.date <= $${params.length + 1}`);
         params.push(endDate);
+    }
+
+    if (branchId) {
+        conditions.push(`tr.branch_id = $${params.length + 1}`);
+        params.push(branchId);
     }
 
     const filteredRegisterConditions = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -100,6 +111,13 @@ export async function fetchTestRegistrationByPatient(patientId: number, startDat
                 paid_price: row.paid_price,
                 collected: row.collected,
                 registeredTests: [],
+                branch: {
+                    id: row.branch_id,
+                    name: row.branch_name,
+                    address: row.branch_address,
+                    telephone: row.branch_telephone,
+                    version: row.branch_version,
+                },
                 version: row.registration_version,
             };
             registrationMap.set(row.test_register_id, registration);
@@ -135,7 +153,8 @@ export async function fetchTestRegistrationByPatient(patientId: number, startDat
 
 export async function getTestRegistrationsForDateRange(
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    branchId?: number
 ) {
     let baseQuery = `
         SELECT 
@@ -164,11 +183,17 @@ export async function getTestRegistrationsForDateRange(
             trt.options,
             trt.data_added,
             trt.printed,
-            trt.version AS registration_test_version
+            trt.version AS registration_test_version,
+            b.id AS branch_id,
+            b.name AS branch_name,
+            b.address AS branch_address,
+            b.telephone AS branch_telephone,
+            b.version AS branch_version
         FROM registrations AS tr
         INNER JOIN patients AS p ON tr.patient_id = p.id
         INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
         INNER JOIN tests AS t ON trt.test_id = t.id
+        INNER JOIN branches AS b ON tr.branch_id = b.id
         LEFT JOIN doctors AS d ON trt.doctor_id = d.id
     `;
 
@@ -182,6 +207,10 @@ export async function getTestRegistrationsForDateRange(
     if (endDate) {
         conditions.push(`tr.date <= $${params.length + 1}`);
         params.push(endDate);
+    }
+    if (branchId) {
+        conditions.push(`tr.branch_id = $${params.length + 1}`);
+        params.push(branchId);
     }
 
     const filteredRegisterConditions = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -233,6 +262,13 @@ export async function getTestRegistrationsForDateRange(
                 paid_price: row.paid_price,
                 collected: row.collected,
                 registeredTests: [],
+                branch: {
+                    id: row.branch_id,
+                    name: row.branch_name,
+                    address: row.branch_address,
+                    telephone: row.branch_telephone,
+                    version: row.branch_version,
+                },
                 version: row.registration_version,
             };
             registrationMap.set(row.test_register_id, registration);
@@ -266,69 +302,83 @@ export async function getTestRegistrationsForDateRange(
     return { totalCount, registrations };
 }
 
-export async function getPeriodsWithTestRegisterIds(granularity: string, startDate?: string, endDate?: string) {
+export async function getPeriodsWithTestRegisterIds(
+    granularity: string,
+    startDate?: string,
+    endDate?: string,
+    branchId?: number
+  ) {
     const query = `
-        WITH time_series AS (
-            SELECT
-                generate_series(
-                    date_trunc(
-                        CASE 
-                            WHEN $1 = 'daily' THEN 'day'
-                            WHEN $1 = 'weekly' THEN 'week'
-                            WHEN $1 = 'monthly' THEN 'month'
-                            WHEN $1 = 'annually' THEN 'year'
-                        END, $2::timestamp
-                    ),
-                    date_trunc(
-                        CASE 
-                            WHEN $1 = 'daily' THEN 'day'
-                            WHEN $1 = 'weekly' THEN 'week'
-                            WHEN $1 = 'monthly' THEN 'month'
-                            WHEN $1 = 'annually' THEN 'year'
-                        END, $3::timestamp
-                    ),
-                    CASE 
-                        WHEN $1 = 'daily' THEN '1 day'::interval
-                        WHEN $1 = 'weekly' THEN '1 week'::interval
-                        WHEN $1 = 'monthly' THEN '1 month'::interval
-                        WHEN $1 = 'annually' THEN '1 year'::interval
-                    END
-                ) AS start_date
-        ),
-        period_boundaries AS (
-            SELECT
-                start_date,
-                start_date + 
-                CASE 
-                    WHEN $1 = 'daily' THEN '1 day'::interval
-                    WHEN $1 = 'weekly' THEN '1 week'::interval
-                    WHEN $1 = 'monthly' THEN '1 month'::interval
-                    WHEN $1 = 'annually' THEN '1 year'::interval
-                END - '1 second'::interval AS end_date
-            FROM time_series
-        )
+      WITH time_series AS (
         SELECT
-            pb.start_date AS start_date_of_period,
-            pb.end_date AS end_date_of_period,
-            COALESCE(json_agg(tr.id), '[]'::json) AS test_register_ids
-        FROM period_boundaries pb
-        LEFT JOIN registrations tr 
-            ON tr.date >= pb.start_date 
-            AND tr.date <= pb.end_date
-        GROUP BY pb.start_date, pb.end_date
-        ORDER BY pb.start_date;
+          generate_series(
+            date_trunc(
+              CASE
+                WHEN $1 = 'daily' THEN 'day'
+                WHEN $1 = 'weekly' THEN 'week'
+                WHEN $1 = 'monthly' THEN 'month'
+                WHEN $1 = 'annually' THEN 'year'
+              END, 
+              $2::timestamp
+            ),
+            date_trunc(
+              CASE
+                WHEN $1 = 'daily' THEN 'day'
+                WHEN $1 = 'weekly' THEN 'week'
+                WHEN $1 = 'monthly' THEN 'month'
+                WHEN $1 = 'annually' THEN 'year'
+              END, 
+              $3::timestamp
+            ),
+            CASE
+              WHEN $1 = 'daily' THEN '1 day'::interval
+              WHEN $1 = 'weekly' THEN '1 week'::interval
+              WHEN $1 = 'monthly' THEN '1 month'::interval
+              WHEN $1 = 'annually' THEN '1 year'::interval
+            END
+          ) AS start_date
+      ),
+      period_boundaries AS (
+        SELECT
+          start_date,
+          start_date + 
+          CASE
+            WHEN $1 = 'daily' THEN '1 day'::interval
+            WHEN $1 = 'weekly' THEN '1 week'::interval
+            WHEN $1 = 'monthly' THEN '1 month'::interval
+            WHEN $1 = 'annually' THEN '1 year'::interval
+          END - '1 second'::interval AS end_date
+        FROM time_series
+      )
+      SELECT
+        pb.start_date AS start_date_of_period,
+        pb.end_date AS end_date_of_period,
+        COALESCE(json_agg(tr.id), '[]'::json) AS test_register_ids
+      FROM period_boundaries pb
+      LEFT JOIN registrations tr
+        ON tr.date >= pb.start_date
+        AND tr.date <= pb.end_date
+        ${branchId ? 'AND tr.branch_id = $4' : ''}
+      GROUP BY pb.start_date, pb.end_date
+      ORDER BY pb.start_date;
     `;
-
-    const values = [granularity, startDate, endDate];
-
+  
+    // Only include branchId in values array if it's provided
+    const values = [
+      granularity,
+      startDate,
+      endDate,
+      ...(branchId ? [branchId] : [])
+    ];
+  
     try {
-        const result = await pool.query(query, values);
-        return result.rows.map(row => ({
-            startDateOfPeriod: new Date(row.start_date_of_period),
-            endDateOfPeriod: new Date(row.end_date_of_period),
-            testRegisterIds: row.test_register_ids,
-        }));
+      const result = await pool.query(query, values);
+      return result.rows.map(row => ({
+        startDateOfPeriod: new Date(row.start_date_of_period),
+        endDateOfPeriod: new Date(row.end_date_of_period),
+        testRegisterIds: row.test_register_ids,
+      }));
     } catch (err) {
-        throw err;
+      throw err;
     }
-}
+  }

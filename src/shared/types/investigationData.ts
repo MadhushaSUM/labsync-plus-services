@@ -1,4 +1,5 @@
 import { InvestigationBase } from "../models/investigation/investigationBase";
+import { BranchType } from "./branch";
 
 export interface InvestigationData {
     investigation_registration_id: number;
@@ -25,6 +26,7 @@ export interface DataEmptyTests {
     doctorId?: number;
     doctorName?: string;
     data?: Record<string, any>;
+    branch: BranchType,
     version: number;
 }
 

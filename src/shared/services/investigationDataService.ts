@@ -34,8 +34,8 @@ export async function updateInvestigationData(invRegId: number, investigationId:
     return await modifyInvestigationData(invRegId, investigationId, validatedDataBody);
 }
 
-export async function getDataEmptyInvestigations() {
-    const rows = await fetchDataEmptyInvestigations();
+export async function getDataEmptyInvestigations(branchId?: number) {
+    const rows = await fetchDataEmptyInvestigations(branchId);
 
     const registrations: DataEmptyTests[] = [];
 
@@ -54,6 +54,13 @@ export async function getDataEmptyInvestigations() {
             ref_number: row.ref_number,
             data: row.data,
             options: row.options,
+            branch: {
+                id: row.branch_id,
+                name: row.branch_name,
+                address: row.branch_address,
+                telephone: row.branch_telephone,
+                version: row.branch_version,
+            },
             version: row.version,
         });
     });
@@ -61,8 +68,8 @@ export async function getDataEmptyInvestigations() {
     return registrations;
 }
 
-export async function getDataAddedInvestigations(limit: number, offset: number, patientId: number, startDate?: string, endDate?: string, refNumber?: number, allReports?: boolean) {
-    const { data, totalCount } = await fetchDataAddedInvestigations(offset, limit, startDate, endDate, patientId, refNumber, allReports);
+export async function getDataAddedInvestigations(limit: number, offset: number, patientId: number, startDate?: string, endDate?: string, refNumber?: number, branchId?: number, allReports?: boolean) {
+    const { data, totalCount } = await fetchDataAddedInvestigations(offset, limit, startDate, endDate, patientId, refNumber, branchId, allReports);
 
     if (data.length === 0) {
         return { totalCount: 0, totalPages: 0, registrations: [] };
@@ -85,6 +92,13 @@ export async function getDataAddedInvestigations(limit: number, offset: number, 
             ref_number: row.ref_number,
             data: row.data,
             options: row.options,
+            branch: {
+                id: row.branch_id,
+                name: row.branch_name,
+                address: row.branch_address,
+                telephone: row.branch_telephone,
+                version: row.branch_version,
+            },
             version: row.version,
         });
     });

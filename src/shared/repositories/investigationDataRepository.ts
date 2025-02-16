@@ -56,7 +56,7 @@ export async function modifyInvestigationData(invRegId: number, investigationId:
     return rows[0];
 }
 
-export async function fetchDataEmptyInvestigations() {
+export async function fetchDataEmptyInvestigations(branchId?: number) {
     const query = `
         SELECT 
             tr.id AS registrations_id,
@@ -72,13 +72,19 @@ export async function fetchDataEmptyInvestigations() {
             d.name AS doctor_name,
             trt.data,
             trt.options,
-            trt.version
+            trt.version,
+            b.id AS branch_id,
+            b.name AS branch_name,
+            b.address AS branch_address,
+            b.telephone AS branch_telephone,
+            b.version AS branch_version
         FROM registrations AS tr
         INNER JOIN patients AS p ON tr.patient_id = p.id
         INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
         INNER JOIN tests AS t ON trt.test_id = t.id
+        INNER JOIN branches AS b ON tr.branch_id = b.id
         LEFT JOIN doctors AS d ON trt.doctor_id = d.id
-        WHERE trt.data_added = false;
+        WHERE trt.data_added = false ${branchId ? `AND tr.branch_id = ${branchId}` : ""};
     `;
 
     const { rows } = await pool.query(query);
@@ -92,6 +98,7 @@ export async function fetchDataAddedInvestigations(
     toDate?: string,
     patientId?: number,
     refNumber?: number,
+    branchId?: number,
     allReports?: boolean,
 ) {
     const conditions: string[] = [];
@@ -112,6 +119,10 @@ export async function fetchDataAddedInvestigations(
     if (refNumber) {
         conditions.push(`tr.ref_number = $${params.length + 1}`);
         params.push(refNumber);
+    }
+    if (branchId) {
+        conditions.push(`tr.branch_id = $${params.length + 1}`);
+        params.push(branchId);
     }
 
     const filteredRegisterConditions = conditions.length > 0 ? `AND ${conditions.join(' AND ')}` : '';
@@ -135,11 +146,17 @@ export async function fetchDataAddedInvestigations(
         d.name AS doctor_name,
         trt.data,
         trt.options,
-        trt.version
+        trt.version,
+        b.id AS branch_id,
+        b.name AS branch_name,
+        b.address AS branch_address,
+        b.telephone AS branch_telephone,
+        b.version AS branch_version
       FROM registrations AS tr
       INNER JOIN patients AS p ON tr.patient_id = p.id
       INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
       INNER JOIN tests AS t ON trt.test_id = t.id
+      INNER JOIN branches AS b ON tr.branch_id = b.id
       LEFT JOIN doctors AS d ON trt.doctor_id = d.id
       WHERE trt.data_added = true ${allReports ? '' : 'AND trt.printed = false'} ${filteredRegisterConditions}
       ORDER BY tr.id
@@ -153,6 +170,7 @@ export async function fetchDataAddedInvestigations(
       INNER JOIN patients AS p ON tr.patient_id = p.id
       INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
       INNER JOIN tests AS t ON trt.test_id = t.id
+      INNER JOIN branches AS b ON tr.branch_id = b.id
       LEFT JOIN doctors AS d ON trt.doctor_id = d.id
       WHERE trt.data_added = true ${filteredRegisterConditions}
     `;

@@ -2,7 +2,7 @@ import { getPatientAnalysisData } from "../../../shared/services/analysisService
 import { checkUserSessionInfo } from "../../../shared/services/sessionService";
 
 export const handler = async (event: any) => {
-    const { patientId, startDate, endDate, userId } = event.queryStringParameters;
+    const { patientId, startDate, endDate, userId, branchId } = event.queryStringParameters;
 
     try {
         const { isActive, isAdmin } = await checkUserSessionInfo(Number(userId));
@@ -29,7 +29,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await getPatientAnalysisData(patientId, startDate, endDate);
+        const result = await getPatientAnalysisData(patientId, startDate, endDate, branchId);
 
         return {
             statusCode: 200,
