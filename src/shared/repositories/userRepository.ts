@@ -131,7 +131,7 @@ export async function modifyUser(id: number, userDetails: {
         new Date(),
         userDetails.image,
         userDetails.role,
-        userDetails.branch,
+        userDetails.branch.id,
         userDetails.version + 1,
         id
     ]);
