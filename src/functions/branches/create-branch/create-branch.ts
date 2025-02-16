@@ -29,7 +29,7 @@ export const handler = async (event: any) => {
                 body: JSON.stringify({ message: "Admin privileges required!" })
             };
         }
-        const result = await addBranch(branchDetails);
+        const result = await addBranch(branchDetails, userId);
         return {
             statusCode: 200,
             headers: {

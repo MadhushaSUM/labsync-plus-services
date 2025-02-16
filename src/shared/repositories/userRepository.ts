@@ -55,11 +55,12 @@ export async function fetchUserById(id: number) {
 export async function saveUser(name: string, email: string, password: string) {
     const query = `
         INSERT INTO public.users(name, email, password)
-        VALUES ($1, $2, $3);
+        VALUES ($1, $2, $3)
+        RETURNING *;
     `;
     const values = [name, email, password];
 
-    await pool.query(query, values);
+    return await pool.query(query, values);
 }
 
 

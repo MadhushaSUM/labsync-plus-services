@@ -3,10 +3,8 @@ import { fetchAllInvestigationRegistrations, fetchInvestigationRegistrationById,
 import { Registration } from "../types/investigationRegistration";
 import { addAuditTrailRecord } from "./auditTrailService";
 
-export async function addInvestigationRegistration(invReg: any) {
+export async function addInvestigationRegistration(invReg: any, userId: number) {
     const addingInvReg = await validateInvestigationRegister(invReg);
-
-
 
     const res = await saveInvestigationRegistration({
         patientId: addingInvReg.patient_id,
@@ -19,8 +17,7 @@ export async function addInvestigationRegistration(invReg: any) {
         refNumber: addingInvReg.refNumber,
     });
 
-    //TODO: update userId 
-    addAuditTrailRecord("user001", "Add registration", addingInvReg);
+    addAuditTrailRecord(userId, "Add registration", addingInvReg);
 
     return res;
 }
@@ -157,7 +154,7 @@ export async function getInvestigationRegistrationById(invRegId: number) {
     return registration;
 }
 
-export async function updateInvestigationRegistration(id: number, invReg: any) {
+export async function updateInvestigationRegistration(id: number, invReg: any, userId: number) {
     const newInvReg = await validateUpdatingInvestigationRegister(invReg);
 
     const oldInvReg = await getInvestigationRegistrationById(id);
@@ -194,8 +191,7 @@ export async function updateInvestigationRegistration(id: number, invReg: any) {
                 version: newInvReg.version
             });
 
-            //TODO: update userId 
-            addAuditTrailRecord("user001", "Update registration", { new: newInvReg, old: oldInvReg });
+            addAuditTrailRecord(userId, "Update registration", { new: newInvReg, old: oldInvReg });
 
             return res;
         }

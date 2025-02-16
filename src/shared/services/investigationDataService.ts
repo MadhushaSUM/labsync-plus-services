@@ -3,7 +3,7 @@ import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData,
 import { DataEmptyTests } from "../types/investigationData";
 import { addAuditTrailRecord } from "./auditTrailService";
 
-export async function addInvestigationData(investigationRegistrationId: number, investigationId: number, body: any) {
+export async function addInvestigationData(investigationRegistrationId: number, investigationId: number, body: any, userId: number) {
     const validatedDataBody = await validateInvestigationDataRequestBody(investigationId, body.data);
 
     const oldInvestigationData = await getInvestigationData(investigationRegistrationId, investigationId);
@@ -18,8 +18,7 @@ export async function addInvestigationData(investigationRegistrationId: number, 
             body.doctor_id
         );
 
-        //TODO: update userId 
-        addAuditTrailRecord("user001", oldInvestigationData.version == 1 ? "Add investigation data" : "Update investigation data", { old: oldInvestigationData, new: res });
+        addAuditTrailRecord(userId, oldInvestigationData.version == 1 ? "Add investigation data" : "Update investigation data", { old: oldInvestigationData, new: res });
         return { new: oldInvestigationData.version == 1, content: res };
     }
 }
@@ -108,10 +107,14 @@ export async function getDataAddedInvestigations(limit: number, offset: number, 
     return { totalCount, registrations, totalPages };
 }
 
-export async function markInvestigationDataAsPrinted(investigationRegisterId: number, investigationId: number) {
-    return await markAsPrinted(true, investigationRegisterId, investigationId)
+export async function markInvestigationDataAsPrinted(investigationRegisterId: number, investigationId: number, userId: number) {
+    const res = await markAsPrinted(true, investigationRegisterId, investigationId)
+    await addAuditTrailRecord(userId, "Investigation marked as printed", { registrationId: investigationRegisterId, investigationId: investigationId });
+    return res;
 }
 
-export async function markInvestigationDataAsDataAdded(data_added: boolean, investigationRegisterId: number, investigationId: number) {
-    return await markAsDataAdded(data_added, investigationRegisterId, investigationId)
+export async function markInvestigationDataAsDataAdded(data_added: boolean, investigationRegisterId: number, investigationId: number, userId: number) {
+    const res = await markAsDataAdded(data_added, investigationRegisterId, investigationId);
+    await addAuditTrailRecord(userId, "Investigation marked to add data again", { registrationId: investigationRegisterId, investigationId: investigationId });
+    return res;
 }

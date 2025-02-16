@@ -14,16 +14,15 @@ export async function getBranchById(branchId: number) {
     return await fetchBranchById(branchId);
 }
 
-export async function addBranch(branch: any) {
+export async function addBranch(branch: any, userId: number) {
     const addingBranch = validateBranch(branch);
 
-    //TODO: update userId 
-    addAuditTrailRecord("user001", "Add new branch", addingBranch);
+    addAuditTrailRecord(userId, "Add new branch", addingBranch);
 
     return await saveBranch(addingBranch);
 }
 
-export async function updateBranch(id: number, branchDetails: any) {
+export async function updateBranch(id: number, branchDetails: any, userId: number) {
     const updatingBranch = validateBranch(branchDetails);
 
     const oldBranch = await fetchBranchById(id);
@@ -31,8 +30,7 @@ export async function updateBranch(id: number, branchDetails: any) {
     if (oldBranch.version != updatingBranch.version) {
         throw new Error("Version mismatch. Please fetch the latest version before updating!");
     } else {
-        //TODO: update userId 
-        addAuditTrailRecord("user001", "Update patient", { new: updatingBranch, old: oldBranch });
+        addAuditTrailRecord(userId, "Update patient", { new: updatingBranch, old: oldBranch });
         return await modifyBranch(id, updatingBranch);
     }
 }

@@ -18,7 +18,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await markInvestigationDataAsPrinted(investigationRegisterId, investigationId);
+        const result = await markInvestigationDataAsPrinted(investigationRegisterId, investigationId, userId);
 
         return {
             statusCode: 200,

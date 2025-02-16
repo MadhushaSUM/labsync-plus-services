@@ -20,7 +20,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await updatePatient(id, patientDetails);
+        const result = await updatePatient(id, patientDetails, userId);
 
         return {
             statusCode: 200,

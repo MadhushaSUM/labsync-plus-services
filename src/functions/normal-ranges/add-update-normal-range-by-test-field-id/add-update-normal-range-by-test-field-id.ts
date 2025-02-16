@@ -30,7 +30,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await addOrUpdateNormalRangeRules(normalRangesDetails);
+        const result = await addOrUpdateNormalRangeRules(normalRangesDetails, userId);
         return {
             statusCode: 200,
             headers: {

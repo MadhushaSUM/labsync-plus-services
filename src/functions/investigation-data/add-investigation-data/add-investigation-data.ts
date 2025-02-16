@@ -17,7 +17,7 @@ export const handler = async (event: any) => {
                 body: JSON.stringify({ message: "No active session!" })
             };
         }
-        const result = await addInvestigationData(investigationRegisterId, investigationId, JSON.parse(event.body));
+        const result = await addInvestigationData(investigationRegisterId, investigationId, JSON.parse(event.body), userId);
         return {
             statusCode: 200,
             headers: {

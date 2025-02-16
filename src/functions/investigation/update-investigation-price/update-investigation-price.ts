@@ -31,7 +31,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await updateInvestigationPrice(id, investigationDetails);
+        const result = await updateInvestigationPrice(id, investigationDetails, userId);
 
         return {
             statusCode: 200,

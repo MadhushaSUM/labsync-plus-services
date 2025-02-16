@@ -26,7 +26,7 @@ export async function checkInvalidInvestigationIds(ids: number[]) {
     return ids;
 }
 
-export async function updateInvestigationPrice(id: number, investigationDetails: any) {
+export async function updateInvestigationPrice(id: number, investigationDetails: any, userId: number) {
     const updatingInvestigation = validateInvestigation(investigationDetails);
 
     const oldInvestigation = await fetchInvestigationById(id);
@@ -35,8 +35,8 @@ export async function updateInvestigationPrice(id: number, investigationDetails:
         throw new Error("Version mismatch. Please fetch the latest version before updating!");
     } else {
         const res = await modifyInvestigationPrice(id, updatingInvestigation.price, updatingInvestigation.version);
-        //TODO: update userId 
-        addAuditTrailRecord("user001", "Update investigation price", { new: updatingInvestigation, old: oldInvestigation });
+
+        addAuditTrailRecord(userId, "Update investigation price", { new: updatingInvestigation, old: oldInvestigation });
         return res;
     }
 }

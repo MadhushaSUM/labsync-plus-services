@@ -1,6 +1,6 @@
 import pool from "../lib/db";
 
-export async function saveAuditTrailRecord(userId: string, operation: string, payload: object) {
+export async function saveAuditTrailRecord(userId: number, operation: string, payload: object) {
     const query = `
         INSERT INTO public.audit_trail(user_id, operation, payload)
         VALUES ($1, $2, $3)
@@ -14,18 +14,25 @@ export async function saveAuditTrailRecord(userId: string, operation: string, pa
 
 
 export async function fetchAllAuditTrailRecords(
-    limit: number, 
-    offset: number, 
-    startDate?: string, 
+    limit: number,
+    offset: number,
+    startDate?: string,
     endDate?: string
 ) {
     const start = startDate ? new Date(startDate).toISOString() : '1970-01-01T00:00:00Z';
     const end = endDate ? new Date(endDate).toISOString() : new Date().toISOString();
 
     const query = `
-        SELECT * FROM public.audit_trail
-        WHERE time_stamp >= $1 AND time_stamp < $2
-        ORDER BY id
+        SELECT
+            a.id,
+            a.operation,
+            a.payload,
+            a.time_stamp,
+            u.name AS user_name        
+        FROM audit_trail AS a
+        INNER JOIN users AS u ON a.user_id = u.id
+        WHERE a.time_stamp >= $1 AND a.time_stamp < $2
+        ORDER BY a.id
         LIMIT $3 OFFSET $4
     `;
 

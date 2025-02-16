@@ -1,6 +1,6 @@
 import { fetchAllAuditTrailRecords, saveAuditTrailRecord } from "../repositories/auditTrailRepository";
 
-export async function addAuditTrailRecord(userId: string, operation: string, payload: object) {
+export async function addAuditTrailRecord(userId: number, operation: string, payload: object) {
 
     return await saveAuditTrailRecord(userId, operation, payload);
 }

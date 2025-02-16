@@ -24,9 +24,8 @@ export async function registerNewUser(name: string, email: string, password: str
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await saveUser(name, email, hashedPassword);
-    //TODO: update userId 
-    addAuditTrailRecord("user001", "New user registration", { name, email });
+    const res = await saveUser(name, email, hashedPassword);
+    addAuditTrailRecord(res.rows[0].id, "New user registration", { name, email });
 }
 
 export async function userLogin(email: string, password: string) {
@@ -53,7 +52,6 @@ export async function userLogin(email: string, password: string) {
             id: user.id,
             name: user.name,
             email: user.email,
-            //TODO: add fields like role
         }
     } else {
         throw new Error("Invalid username or password!");
@@ -106,8 +104,7 @@ export async function updateUser(id: number, userDetails: any) {
         throw new Error("Version mismatch. Please fetch the latest version before updating!");
     } else {
         const res = await modifyUser(id, updatingUser);
-        //TODO: update userId 
-        addAuditTrailRecord("user001", "Update user", { new: updatingUser, old: oldUser });
+        addAuditTrailRecord(id, "Update user", { new: updatingUser, old: oldUser });
         return res;
     }
 }

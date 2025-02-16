@@ -19,7 +19,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await addPatient(patientDetails);
+        const result = await addPatient(patientDetails, userId);
         return {
             statusCode: 200,
             headers: {

@@ -19,7 +19,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await addInvestigationRegistration(invRegDetails);
+        const result = await addInvestigationRegistration(invRegDetails, userId);
         return {
             statusCode: 200,
             headers: {
@@ -29,7 +29,7 @@ export const handler = async (event: any) => {
             },
             body: JSON.stringify({ message: 'Investigation registration added successfully', content: result })
         };
-    } catch (error: any) { 
+    } catch (error: any) {
         return {
             statusCode: 500,
             headers: {

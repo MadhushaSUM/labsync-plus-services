@@ -20,7 +20,7 @@ export const handler = async (event: any) => {
             };
         }
 
-        const result = await updateInvestigationRegistration(id, invRegDetails);
+        const result = await updateInvestigationRegistration(id, invRegDetails, userId);
         return {
             statusCode: 200,
             headers: {

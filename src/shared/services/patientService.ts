@@ -2,11 +2,10 @@ import { validatePatient } from "../models/patient";
 import { fetchAllPatients, fetchPatientById, fetchPatientByName, modifyPatient, savePatient } from "../repositories/patientRepository";
 import { addAuditTrailRecord } from "./auditTrailService";
 
-export async function addPatient(patient: any) {
+export async function addPatient(patient: any, userId: number) {
     const addingPatient = validatePatient(patient);
 
-    //TODO: update userId 
-    addAuditTrailRecord("user001", "Add patient", addingPatient);
+    addAuditTrailRecord(userId, "Add patient", addingPatient);
 
     return await savePatient(addingPatient);
 }
@@ -29,7 +28,7 @@ export async function getAllPatients(limit: number, offset: number, search?: str
     return await fetchAllPatients(limit, offset, search);
 }
 
-export async function updatePatient(id: number, patientDetails: any) {
+export async function updatePatient(id: number, patientDetails: any, userId: number) {
     const updatingPatient = validatePatient(patientDetails);
 
     const oldPatient = await fetchPatientById(id);
@@ -37,8 +36,7 @@ export async function updatePatient(id: number, patientDetails: any) {
     if (oldPatient.version != updatingPatient.version) {
         throw new Error("Version mismatch. Please fetch the latest version before updating!");
     } else {
-        //TODO: update userId 
-        addAuditTrailRecord("user001", "Update patient", { new: updatingPatient, old: oldPatient });
+        addAuditTrailRecord(userId, "Update patient", { new: updatingPatient, old: oldPatient });
         return await modifyPatient(id, updatingPatient);
     }
 }
