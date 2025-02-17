@@ -311,6 +311,14 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "get-patient-potal-data"
+      handler     = "index.handler"
+      filename    = "patient-portal/get-patient-potal-data/get-patient-potal-data.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 

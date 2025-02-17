@@ -39,6 +39,49 @@ export async function fetchInvestigationData(investigationRegisterId: number, in
     }
 }
 
+export async function fetchInvestigationDataPatientPortal(
+    investigationRegisterId: number,
+    investigationId: number
+) {
+    try {
+        const query = `
+        SELECT 
+            tr.id AS registrations_id,
+            tr.date,
+            tr.ref_number,
+            p.id AS patient_id,
+            p.name AS patient_name,
+            p.gender AS patient_gender,
+            p.date_of_birth AS patient_date_of_birth,
+            t.id AS test_id,
+            t.name AS test_name,
+            d.id AS doctor_id,
+            d.name AS doctor_name,
+            trt.data,
+            trt.options,
+            trt.version,
+            b.id AS branch_id,
+            b.name AS branch_name,
+            b.address AS branch_address,
+            b.telephone AS branch_telephone,
+            b.version AS branch_version
+        FROM registrations AS tr
+        INNER JOIN patients AS p ON tr.patient_id = p.id
+        INNER JOIN registrations_tests AS trt ON tr.id = trt.registrations_id
+        INNER JOIN tests AS t ON trt.test_id = t.id
+        INNER JOIN branches AS b ON tr.branch_id = b.id
+        LEFT JOIN doctors AS d ON trt.doctor_id = d.id
+        WHERE trt.registrations_id = $1 AND trt.test_id = $2;
+        `;
+
+        const { rows } = await pool.query(query, [investigationRegisterId, investigationId]);
+        return rows[0] || null;
+    } catch (error: any) {
+        throw new Error(`Failed to fetch investigation data: ${error.message}`);
+    }
+}
+
+
 export async function modifyInvestigationData(invRegId: number, investigationId: number, investigationData: InvestigationBase) {
     const query = `
         UPDATE public."Investigation data"

@@ -1,5 +1,5 @@
 import { validateInvestigationDataRequestBody } from "../models/investigationData";
-import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations, fetchDataAddedInvestigations, markAsPrinted, markAsDataAdded } from "../repositories/investigationDataRepository";
+import { saveInvestigationData, fetchInvestigationData, modifyInvestigationData, fetchDataEmptyInvestigations, fetchDataAddedInvestigations, markAsPrinted, markAsDataAdded, fetchInvestigationDataPatientPortal } from "../repositories/investigationDataRepository";
 import { DataEmptyTests } from "../types/investigationData";
 import { addAuditTrailRecord } from "./auditTrailService";
 
@@ -25,6 +25,35 @@ export async function addInvestigationData(investigationRegistrationId: number, 
 
 export async function getInvestigationData(investigationRegistrationId: number, investigationId: number) {
     return await fetchInvestigationData(investigationRegistrationId, investigationId);;
+}
+
+export async function getInvestigationDataPatientPortal(investigationRegistrationId: number, investigationId: number) {
+    const row = await fetchInvestigationDataPatientPortal(investigationRegistrationId, investigationId);
+    const data: DataEmptyTests = {
+        testRegisterId: row.registrations_id,
+        testId: row.test_id,
+        testName: row.test_name,
+        patientId: row.patient_id,
+        patientName: row.patient_name,
+        patientDOB: new Date(row.patient_date_of_birth),
+        patientGender: row.patient_gender,
+        date: row.date,
+        doctorId: row.doctor_id,
+        doctorName: row.doctor_name,
+        ref_number: row.ref_number,
+        data: row.data,
+        options: row.options,
+        branch: {
+            id: row.branch_id,
+            name: row.branch_name,
+            address: row.branch_address,
+            telephone: row.branch_telephone,
+            version: row.branch_version,
+        },
+        version: row.version,
+    }
+
+    return data;
 }
 
 export async function updateInvestigationData(invRegId: number, investigationId: number, body: any) {

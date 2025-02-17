@@ -40,6 +40,7 @@ module.exports = {
     'branches/create-branch': './src/functions/branches/create-branch/create-branch.ts',
     'branches/get-all-branches': './src/functions/branches/get-all-branches/get-all-branches.ts',
     'branches/update-branch': './src/functions/branches/update-branch/update-branch.ts',
+    'patient-portal/get-patient-potal-data': './src/functions/patient-portal/get-patient-potal-data/get-patient-potal-data.ts',
   },
   target: 'node',
   mode: 'production',
