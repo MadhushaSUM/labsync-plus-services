@@ -41,6 +41,8 @@ module.exports = {
     'branches/get-all-branches': './src/functions/branches/get-all-branches/get-all-branches.ts',
     'branches/update-branch': './src/functions/branches/update-branch/update-branch.ts',
     'patient-portal/get-patient-potal-data': './src/functions/patient-portal/get-patient-potal-data/get-patient-potal-data.ts',
+    'configs/get-config-by-id': './src/functions/configs/get-config-by-id/get-config-by-id.ts',
+    'configs/set-config-by-id': './src/functions/configs/set-config-by-id/set-config-by-id.ts',
   },
   target: 'node',
   mode: 'production',

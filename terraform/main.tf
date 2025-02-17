@@ -319,6 +319,22 @@ module "lambda_functions" {
       memory_size = 128
       timeout     = 120
     },
+    {
+      name        = "set-config-by-id"
+      handler     = "index.handler"
+      filename    = "configs/set-config-by-id/set-config-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
+    {
+      name        = "get-config-by-id"
+      handler     = "index.handler"
+      filename    = "configs/get-config-by-id/get-config-by-id.zip"
+      runtime     = "nodejs20.x"
+      memory_size = 128
+      timeout     = 120
+    },
   ]
 }
 
